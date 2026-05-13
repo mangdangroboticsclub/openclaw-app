@@ -1,0 +1,36 @@
+{
+  "task-e21c36aa3e6c": {
+    "taskId": "task-e21c36aa3e6c",
+    "action": "robot.look_up",
+    "params": {
+      "duration": 5.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Looked up for 5 seconds",
+    "result": "Completed successfully",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778495903.412333,
+    "updatedAt": 1778496007.7550628
+  },
+  "task-7eabb984bbf5": {
+    "taskId": "task-7eabb984bbf5",
+    "action": "robot.look_down",
+    "params": {
+      "duration": 3.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Looked down for 3 seconds",
+    "result": "Completed successfully",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778495903.4123662,
+    "updatedAt": 1778496012.8054042
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "taskId": "task-1778493235",
+  "action": "robot.reset",
+  "params": {},
+  "userQuery": "",
+  "status": "completed",
+  "phase": "done",
+  "progress": 100,
+  "message": "Robot reset sequence sent successfully",
+  "result": "Reset sequence (L1\u2192R1\u2192L1) executed. Robot activation state cleared.",
+  "error": null,
+  "announced": true,
+  "createdAt": 1778493235.8046658,
+  "updatedAt": 1778494007.762691
+}

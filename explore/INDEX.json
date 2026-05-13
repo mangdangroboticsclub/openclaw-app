@@ -1,0 +1,19 @@
+{
+  "topics": {
+    "camera_person_follow": {
+      "status": "completed",
+      "implemented": true,
+      "tested": true,
+      "note": "HOG-based person following with live video display. 4 implementations exist. Tested 2026-05-12.",
+      "files": [
+        "custom/camera_person_follow/main.py",
+        "custom/camera_person_follow_with_live_video/main.py",
+        "custom/camera_live_feed_on_screen/main.py",
+        "custom/camera_person_follower.py",
+        "explore/camera_person_follow.md"
+      ],
+      "createdAt": 1778653566,
+      "updatedAt": 1778653646
+    }
+  }
+}

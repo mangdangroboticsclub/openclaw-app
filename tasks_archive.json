@@ -1,0 +1,1217 @@
+{
+  "task-1778487604": {
+    "taskId": "task-1778487604",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778487604.8258584,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778487690": {
+    "taskId": "task-1778487690",
+    "action": "robot.move_right",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778487690.0475361,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778487822": {
+    "taskId": "task-1778487822",
+    "action": "robot.activate",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778487822.7426546,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778487918": {
+    "taskId": "task-1778487918",
+    "action": "task_status",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778487918.2949913,
+    "executionTime": 21.673787832260132
+  },
+  "task-1778487953": {
+    "taskId": "task-1778487953",
+    "action": "robot.move_right",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778487953.1346262,
+    "executionTime": 40.246994495391846
+  },
+  "task-1778488019": {
+    "taskId": "task-1778488019",
+    "action": "robot.move_forward",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778488019.8271272,
+    "executionTime": 51.75210475921631
+  },
+  "task-1778488112": {
+    "taskId": "task-1778488112",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778488112.1295288,
+    "executionTime": 49.15390682220459
+  },
+  "task-1778486544": {
+    "taskId": "task-1778486544",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778486544.8557742,
+    "executionTime": 0
+  },
+  "task-1778486591": {
+    "taskId": "task-1778486591",
+    "action": "robot.turn_left",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778486591.3478727,
+    "executionTime": 0
+  },
+  "task-1778486743": {
+    "taskId": "task-1778486743",
+    "action": "robot.move_direction",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778486743.0127103,
+    "executionTime": 0
+  },
+  "task-1778486887": {
+    "taskId": "task-1778486887",
+    "action": "cancel_all_tasks",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778486887.512438,
+    "executionTime": 0
+  },
+  "task-test-cron-001": {
+    "taskId": "task-test-cron-001",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778491285.2469661,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778491483": {
+    "taskId": "task-1778491483",
+    "action": "robot.step_right",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778491483.8811653,
+    "executionTime": 0
+  },
+  "task-1778492048": {
+    "taskId": "task-1778492048",
+    "action": "robot.move_right",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778492048.780284,
+    "executionTime": 56.77339482307434
+  },
+  "task-1778492693": {
+    "taskId": "task-1778492693",
+    "action": "robot.move_right",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778492693.6526513,
+    "executionTime": 32.80040454864502
+  },
+  "task-1778492798": {
+    "taskId": "task-1778492798",
+    "action": "robot.activate",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778492798.6438992,
+    "executionTime": 4.76837158203125e-07
+  },
+  "task-1778492929": {
+    "taskId": "task-1778492929",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778492929.250317,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778493015": {
+    "taskId": "task-1778493015",
+    "action": "robot.press_button",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778493015.1278872,
+    "executionTime": 29.3505859375
+  },
+  "task-1778493062": {
+    "taskId": "task-1778493062",
+    "action": "robot.move_backward",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778493062.0035906,
+    "executionTime": 61.24977111816406
+  },
+  "task-1778493147": {
+    "taskId": "task-1778493147",
+    "action": "robot.turn_off",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778493147.5978148,
+    "executionTime": 71.67797136306763
+  },
+  "task-1778493235": {
+    "taskId": "task-1778493235",
+    "action": "robot.reset",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778493235.8046658,
+    "executionTime": 763.099936246872
+  },
+  "task-1778493968": {
+    "taskId": "task-1778493968",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778493968.6261566,
+    "executionTime": 30.278451442718506
+  },
+  "task-1778494050": {
+    "taskId": "task-1778494050",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778494050.3591063,
+    "executionTime": 206.11657857894897
+  },
+  "task-1778494199": {
+    "taskId": "task-1778494199",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778494199.0656242,
+    "executionTime": 73.72088193893433
+  },
+  "task-1778494399": {
+    "taskId": "task-1778494399",
+    "action": "robot.detect_people",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778494399.2465267,
+    "executionTime": 201580.75347328186
+  },
+  "task-1778494487": {
+    "taskId": "task-1778494487",
+    "action": "robot.cancel_task",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778494487.662837,
+    "executionTime": 0
+  },
+  "task-1778494536": {
+    "taskId": "task-1778494536",
+    "action": "robot.look_direction",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778494536.3361945,
+    "executionTime": 32.945666551589966
+  },
+  "task-1778494590": {
+    "taskId": "task-1778494590",
+    "action": "robot.look_direction",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778494590.6667953,
+    "executionTime": 57.50149178504944
+  },
+  "task-e0079319fd37": {
+    "taskId": "task-e0079319fd37",
+    "action": "robot.move_right",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778495833.498099,
+    "executionTime": 51.07381892204285
+  },
+  "task-04314d4c27a1": {
+    "taskId": "task-04314d4c27a1",
+    "action": "robot.move_left",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778495833.4981344,
+    "executionTime": 51.07378363609314
+  },
+  "task-e21c36aa3e6c": {
+    "taskId": "task-e21c36aa3e6c",
+    "action": "robot.look_up",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778495903.412333,
+    "executionTime": 99.67209887504578
+  },
+  "task-7eabb984bbf5": {
+    "taskId": "task-7eabb984bbf5",
+    "action": "robot.look_down",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778495903.4123662,
+    "executionTime": 99.67206573486328
+  },
+  "task-abedf63469f9": {
+    "taskId": "task-abedf63469f9",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778496608.4475627,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-8fbb3449f6e7": {
+    "taskId": "task-8fbb3449f6e7",
+    "action": "robot.analyze_image",
+    "status": "completed",
+    "archivedAt": 1778496923.166786,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778496656.4046962,
+    "executionTime": 95.71432328224182
+  },
+  "task-e0061a26ae30": {
+    "taskId": "task-e0061a26ae30",
+    "action": "robot.analyze_image",
+    "status": "completed",
+    "archivedAt": 1778576136.2495434,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-11.json",
+    "createdAt": 1778496792.464879,
+    "executionTime": 139.36518669128418
+  },
+  "task-5d9ad04aec5": {
+    "taskId": "task-5d9ad04aec5",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778576569.6612904,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778576158.5726902,
+    "executionTime": 17.42730975151062
+  },
+  "task-0699c2bbd6a5": {
+    "taskId": "task-0699c2bbd6a5",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778577121.9751406,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778576589.191735,
+    "executionTime": 30.945504426956177
+  },
+  "task-dbc6171f0e1a": {
+    "taskId": "task-dbc6171f0e1a",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778577121.9831388,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778576655.355717,
+    "executionTime": 33.85534119606018
+  },
+  "task-02bfb965630f": {
+    "taskId": "task-02bfb965630f",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778578428.9865975,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778577159.8177018,
+    "executionTime": 44.71386671066284
+  },
+  "task-d551bad255d5": {
+    "taskId": "task-d551bad255d5",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778578507.1085675,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778578449.464362,
+    "executionTime": 36.592222452163696
+  },
+  "task-449fe43a1b13": {
+    "taskId": "task-449fe43a1b13",
+    "action": "robot.move_right",
+    "status": "completed",
+    "archivedAt": 1778578654.7318761,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778578603.6545272,
+    "executionTime": 42.463199615478516
+  },
+  "task-4fa8f057b568": {
+    "taskId": "task-4fa8f057b568",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778578718.950448,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778578669.2058876,
+    "executionTime": 20.79411244392395
+  },
+  "task-f134462bb7a4": {
+    "taskId": "task-f134462bb7a4",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778578730.7517035,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778578674.859383,
+    "executionTime": 15.14061689376831
+  },
+  "task-bcd3abb7d447": {
+    "taskId": "task-bcd3abb7d447",
+    "action": "robot.turn_right",
+    "status": "completed",
+    "archivedAt": 1778579992.8468843,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778578865.0663378,
+    "executionTime": 68.3826687335968
+  },
+  "task-b91ce00753f6": {
+    "taskId": "task-b91ce00753f6",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778581626.1941922,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778580589.1016507,
+    "executionTime": 53.38134574890137
+  },
+  "task-49e31724bea4": {
+    "taskId": "task-49e31724bea4",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778582006.1583195,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778580013.270471,
+    "executionTime": 4.76837158203125e-07
+  },
+  "task-df4d62d48188": {
+    "taskId": "task-df4d62d48188",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778582006.1724563,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778580355.6792014,
+    "executionTime": 58.901808977127075
+  },
+  "task-12c6423b246a": {
+    "taskId": "task-12c6423b246a",
+    "action": "robot.turn_left",
+    "status": "completed",
+    "archivedAt": 1778582006.1822994,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778581645.536205,
+    "executionTime": 55.86596608161926
+  },
+  "task-639587ef1735": {
+    "taskId": "task-639587ef1735",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778582006.197528,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778581662.8719616,
+    "executionTime": 53.35522651672363
+  },
+  "task-3884cc220c60": {
+    "taskId": "task-3884cc220c60",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778582090.239396,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778582044.2905488,
+    "executionTime": 32.4602906703949
+  },
+  "task-051c4905b6aa": {
+    "taskId": "task-051c4905b6aa",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778584110.1796732,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778582202.207892,
+    "executionTime": 55.02520298957825
+  },
+  "task-ede640b485b6": {
+    "taskId": "task-ede640b485b6",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778584536.1971025,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778584330.45948,
+    "executionTime": 4.76837158203125e-07
+  },
+  "task-aa717094a226": {
+    "taskId": "task-aa717094a226",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778584670.5556042,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778584598.0151353,
+    "executionTime": 21.984864711761475
+  },
+  "task-5cfe6f9dc4e1": {
+    "taskId": "task-5cfe6f9dc4e1",
+    "action": "robot.show_image",
+    "status": "completed",
+    "archivedAt": 1778584682.663326,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778584610.361154,
+    "executionTime": 9.638845920562744
+  },
+  "task-e781ac94913e": {
+    "taskId": "task-e781ac94913e",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778585087.7053416,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778584622.6112206,
+    "executionTime": 73.96276330947876
+  },
+  "task-c03e38963f87": {
+    "taskId": "task-c03e38963f87",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778586794.7925804,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778585095.695176,
+    "executionTime": 1685.11722946167
+  },
+  "task-1be53e8b2dd4": {
+    "taskId": "task-1be53e8b2dd4",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778586866.0346634,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778585306.295503,
+    "executionTime": 1547.318787574768
+  },
+  "task-10f27a920e1d": {
+    "taskId": "task-10f27a920e1d",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778586877.469167,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778586546.4651985,
+    "executionTime": 307.1491057872772
+  },
+  "task-d908e9755fa3": {
+    "taskId": "task-d908e9755fa3",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778587063.3747005,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778587015.9448533,
+    "executionTime": 4.76837158203125e-07
+  },
+  "task-b8580de644f6": {
+    "taskId": "task-b8580de644f6",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778587786.7073922,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778587366.9753013,
+    "executionTime": 374.5271408557892
+  },
+  "task-8591bc395164": {
+    "taskId": "task-8591bc395164",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778587839.826571,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778587793.3428543,
+    "executionTime": 32.42150402069092
+  },
+  "task-551b541cf5a8": {
+    "taskId": "task-551b541cf5a8",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778637299.3920226,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778588219.0706096,
+    "executionTime": 40.3373064994812
+  },
+  "task-8e2d71d64a7c": {
+    "taskId": "task-8e2d71d64a7c",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778637299.4226213,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778588548.864234,
+    "executionTime": 497.5864119529724
+  },
+  "task-e268e377f085": {
+    "taskId": "task-e268e377f085",
+    "action": "robot.start_person_follow",
+    "status": "completed",
+    "archivedAt": 1778637299.408632,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778588278.7425585,
+    "executionTime": 796.8982932567596
+  },
+  "task-a3ce9ac37716": {
+    "taskId": "task-a3ce9ac37716",
+    "action": "robot.start_person_follow",
+    "status": "completed",
+    "archivedAt": 1778637299.4401047,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589086.5306044,
+    "executionTime": 249.33344388008118
+  },
+  "task-2fb315673efb": {
+    "taskId": "task-2fb315673efb",
+    "action": "robot.start_person_follow",
+    "status": "completed",
+    "archivedAt": 1778637299.454291,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589173.2004137,
+    "executionTime": 171.22068667411804
+  },
+  "task-2c480df6d032": {
+    "taskId": "task-2c480df6d032",
+    "action": "robot.activate",
+    "status": "completed",
+    "archivedAt": 1778637299.481372,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589313.2786298,
+    "executionTime": 64.65207171440125
+  },
+  "task-023f0625366a": {
+    "taskId": "task-023f0625366a",
+    "action": "robot.set_mode",
+    "status": "completed",
+    "archivedAt": 1778637299.5065885,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589313.2786665,
+    "executionTime": 72.10212016105652
+  },
+  "task-366f65ff7728": {
+    "taskId": "task-366f65ff7728",
+    "action": "robot.set_mode",
+    "status": "completed",
+    "archivedAt": 1778637299.5194623,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589358.404982,
+    "executionTime": 46.465808391571045
+  },
+  "task-7cddbb155d7d": {
+    "taskId": "task-7cddbb155d7d",
+    "action": "robot.activate",
+    "status": "completed",
+    "archivedAt": 1778637299.531735,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589372.667605,
+    "executionTime": 38.99278235435486
+  },
+  "task-0faaebd18f34": {
+    "taskId": "task-0faaebd18f34",
+    "action": "robot.activate",
+    "status": "completed",
+    "archivedAt": 1778637299.5446153,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589394.9342313,
+    "executionTime": 24.085975885391235
+  },
+  "task-c2ae1304741f": {
+    "taskId": "task-c2ae1304741f",
+    "action": "robot.set_mode",
+    "status": "completed",
+    "archivedAt": 1778637299.557145,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589394.9342694,
+    "executionTime": 31.857274532318115
+  },
+  "task-670aec41ab27": {
+    "taskId": "task-670aec41ab27",
+    "action": "robot.start_person_follow",
+    "status": "completed",
+    "archivedAt": 1778637299.4687736,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589272.9455123,
+    "executionTime": 181.3934133052826
+  },
+  "task-9bc4f1c31114": {
+    "taskId": "task-9bc4f1c31114",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778637299.569418,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589443.3366084,
+    "executionTime": 103.82133841514587
+  },
+  "task-8c95689f7411": {
+    "taskId": "task-8c95689f7411",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778637299.5824385,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589486.1004558,
+    "executionTime": 375.91198778152466
+  },
+  "task-63ca2b96fb40": {
+    "taskId": "task-63ca2b96fb40",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778637299.5952437,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-12.json",
+    "createdAt": 1778589497.4691288,
+    "executionTime": 364.5433192253113
+  },
+  "task-f0932b9c012b": {
+    "taskId": "task-f0932b9c012b",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778644669.8299356,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637451.4462094,
+    "executionTime": 30.82141089439392
+  },
+  "task-11cc464d6c9f": {
+    "taskId": "task-11cc464d6c9f",
+    "action": "robot.start_camera_feed",
+    "status": "completed",
+    "archivedAt": 1778644669.8465073,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637506.2410583,
+    "executionTime": 61.373252630233765
+  },
+  "task-90ee9dd61a64": {
+    "taskId": "task-90ee9dd61a64",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778644669.8603115,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637539.0356038,
+    "executionTime": 50.59624695777893
+  },
+  "task-32320a15d648": {
+    "taskId": "task-32320a15d648",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778644669.8735785,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637631.108749,
+    "executionTime": 104.33289003372192
+  },
+  "task-b1f6be499676": {
+    "taskId": "task-b1f6be499676",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778644669.8900352,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637724.9294338,
+    "executionTime": 98.37838912010193
+  },
+  "task-0e9e86ee03ca": {
+    "taskId": "task-0e9e86ee03ca",
+    "action": "robot.move_forward",
+    "status": "completed",
+    "archivedAt": 1778644669.9029312,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637849.7154992,
+    "executionTime": 66.35715770721436
+  },
+  "task-a26ff504211b": {
+    "taskId": "task-a26ff504211b",
+    "action": "robot.turn_left",
+    "status": "completed",
+    "archivedAt": 1778644669.9159355,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637849.715536,
+    "executionTime": 73.46280646324158
+  },
+  "task-ee3c2c351fea": {
+    "taskId": "task-ee3c2c351fea",
+    "action": "robot.move_forward",
+    "status": "completed",
+    "archivedAt": 1778644669.9575484,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637849.715565,
+    "executionTime": 52.22050189971924
+  },
+  "task-4a3d2cf6c80f": {
+    "taskId": "task-4a3d2cf6c80f",
+    "action": "robot.turn_right",
+    "status": "completed",
+    "archivedAt": 1778644669.9698,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637849.7155924,
+    "executionTime": 52.22047448158264
+  },
+  "task-1da7ecae7426": {
+    "taskId": "task-1da7ecae7426",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778644669.9825683,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778637887.9332285,
+    "executionTime": 36.62824249267578
+  },
+  "task-b8a428866d44": {
+    "taskId": "task-b8a428866d44",
+    "action": "robot.move_backward",
+    "status": "completed",
+    "archivedAt": 1778644669.9947217,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778639612.940143,
+    "executionTime": 29.03723978996277
+  },
+  "task-1f9eb4a66a5d": {
+    "taskId": "task-1f9eb4a66a5d",
+    "action": "robot.show_camera_feed",
+    "status": "completed",
+    "archivedAt": 1778644670.0067348,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778639655.7816439,
+    "executionTime": 36.13215374946594
+  },
+  "task-d808834c317c": {
+    "taskId": "task-d808834c317c",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778644670.0193195,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778639699.266604,
+    "executionTime": 47.86031723022461
+  },
+  "task-977623359c1c": {
+    "taskId": "task-977623359c1c",
+    "action": "run_implementation",
+    "status": "completed",
+    "archivedAt": 1778644670.0315456,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778639910.5404124,
+    "executionTime": 81.41007018089294
+  },
+  "task-0079931e388b": {
+    "taskId": "task-0079931e388b",
+    "action": "robot.move_forward",
+    "status": "completed",
+    "archivedAt": 1778644670.0440588,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643078.7167063,
+    "executionTime": 33.165632486343384
+  },
+  "task-9e1b7f495a9e": {
+    "taskId": "task-9e1b7f495a9e",
+    "action": "robot.reset_position",
+    "status": "completed",
+    "archivedAt": 1778644670.0565164,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643105.7746232,
+    "executionTime": 46.267841815948486
+  },
+  "task-7cfbafca2043": {
+    "taskId": "task-7cfbafca2043",
+    "action": "robot.follow_person",
+    "status": "failed",
+    "archivedAt": 1778644670.0689824,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643320.371173,
+    "executionTime": 313.7602198123932
+  },
+  "task-e50cd418e414": {
+    "taskId": "task-e50cd418e414",
+    "action": "robot.reset_position",
+    "status": "completed",
+    "archivedAt": 1778644670.0809386,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643578.7812486,
+    "executionTime": 62.01891016960144
+  },
+  "task-18eba1d6bd6b": {
+    "taskId": "task-18eba1d6bd6b",
+    "action": "robot.pose",
+    "status": "completed",
+    "archivedAt": 1778644670.093007,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643648.260956,
+    "executionTime": 55.3686101436615
+  },
+  "task-6eb88f43de29": {
+    "taskId": "task-6eb88f43de29",
+    "action": "robot.look_left",
+    "status": "completed",
+    "archivedAt": 1778644670.1054869,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643653.644494,
+    "executionTime": 56.83538889884949
+  },
+  "task-7eb0e5f78185": {
+    "taskId": "task-7eb0e5f78185",
+    "action": "robot.look_right",
+    "status": "completed",
+    "archivedAt": 1778644670.1175551,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643653.6445282,
+    "executionTime": 64.97543168067932
+  },
+  "task-ae30ff8c236c": {
+    "taskId": "task-ae30ff8c236c",
+    "action": "robot.look_up",
+    "status": "completed",
+    "archivedAt": 1778644670.1298656,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643659.019733,
+    "executionTime": 98.48746109008789
+  },
+  "task-205c775e4643": {
+    "taskId": "task-205c775e4643",
+    "action": "robot.look_down",
+    "status": "completed",
+    "archivedAt": 1778644670.1461856,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643659.0197725,
+    "executionTime": 107.00813674926758
+  },
+  "task-ab4b07aae276": {
+    "taskId": "task-ab4b07aae276",
+    "action": "robot.look_left",
+    "status": "completed",
+    "archivedAt": 1778644670.1590705,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643659.0198007,
+    "executionTime": 113.48699712753296
+  },
+  "task-cc6426539597": {
+    "taskId": "task-cc6426539597",
+    "action": "robot.look_right",
+    "status": "completed",
+    "archivedAt": 1778644670.1776893,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643659.0198283,
+    "executionTime": 119.99831700325012
+  },
+  "task-cf8a43543320": {
+    "taskId": "task-cf8a43543320",
+    "action": "robot.pose",
+    "status": "completed",
+    "archivedAt": 1778644670.1901927,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643762.2360053,
+    "executionTime": 28.210044145584106
+  },
+  "task-9a9630302b14": {
+    "taskId": "task-9a9630302b14",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778644670.2024872,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643799.6740613,
+    "executionTime": 730.3259387016296
+  },
+  "task-e74381538075": {
+    "taskId": "task-e74381538075",
+    "action": "vision.analyze_image_with_gemini",
+    "status": "completed",
+    "archivedAt": 1778644670.2153378,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778643799.674096,
+    "executionTime": 730.3259038925171
+  },
+  "task-b6c033131aa2": {
+    "taskId": "task-b6c033131aa2",
+    "action": "vision.analyze_image_with_gemini",
+    "status": "completed",
+    "archivedAt": 1778644670.228039,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778644065.5559838,
+    "executionTime": 464.4440162181854
+  },
+  "task-297e15ce915a": {
+    "taskId": "task-297e15ce915a",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778644705.6487453,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778644674.551605,
+    "executionTime": 16.29905128479004
+  },
+  "task-21915ebcf908": {
+    "taskId": "task-21915ebcf908",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778645317.3864288,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778644711.1810365,
+    "executionTime": 592.011700630188
+  },
+  "task-a3e6870d9e1b": {
+    "taskId": "task-a3e6870d9e1b",
+    "action": "robot.analyze_photo",
+    "status": "completed",
+    "archivedAt": 1778645712.8511667,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778645359.766453,
+    "executionTime": 339.31712579727173
+  },
+  "task-8f202563d9d0": {
+    "taskId": "task-8f202563d9d0",
+    "action": "implement",
+    "status": "completed",
+    "archivedAt": 1778646133.4631298,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778645982.076,
+    "executionTime": 135.48181700706482
+  },
+  "task-cd339d0ed3c5": {
+    "taskId": "task-cd339d0ed3c5",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778649580.3657525,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778649529.02448,
+    "executionTime": 34.15393280982971
+  },
+  "task-1619ed37f6bc": {
+    "taskId": "task-1619ed37f6bc",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778650410.0622907,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778650374.0362961,
+    "executionTime": 1225.9637038707733
+  },
+  "task-30e204b10575": {
+    "taskId": "task-30e204b10575",
+    "action": "vision_analyze_image",
+    "status": "failed",
+    "archivedAt": 1778650416.6437554,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778650374.0363305,
+    "executionTime": 1225.963669538498
+  },
+  "task-f1415b4eecdd": {
+    "taskId": "task-f1415b4eecdd",
+    "action": "vision_analyze_image",
+    "status": "completed",
+    "archivedAt": 1778650931.2757704,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778650437.1351173,
+    "executionTime": 481.23323011398315
+  },
+  "task-dca030a0c054": {
+    "taskId": "task-dca030a0c054",
+    "action": "vision_analyze_image",
+    "status": "completed",
+    "archivedAt": 1778650941.594104,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778650597.8655858,
+    "executionTime": 320.5027656555176
+  },
+  "task-21f048f866b9": {
+    "taskId": "task-21f048f866b9",
+    "action": "vision_analyze_image",
+    "status": "completed",
+    "archivedAt": 1778651372.5118566,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778650976.8801997,
+    "executionTime": 381.580769777298
+  },
+  "task-d7bfeaa5053e": {
+    "taskId": "task-d7bfeaa5053e",
+    "action": "robot.move_backward",
+    "status": "completed",
+    "archivedAt": 1778651379.5694642,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778651079.009294,
+    "executionTime": 279.4516808986664
+  },
+  "task-b49998a4c897": {
+    "taskId": "task-b49998a4c897",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778652575.49528,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778652139.1386137,
+    "executionTime": 419.3527817726135
+  },
+  "task-0785faa1e86b": {
+    "taskId": "task-0785faa1e86b",
+    "action": "robot.turn",
+    "status": "completed",
+    "archivedAt": 1778652641.560482,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778652600.2808301,
+    "executionTime": 32.116126537323
+  },
+  "task-d69b0086ca87": {
+    "taskId": "task-d69b0086ca87",
+    "action": "robot.reset_position",
+    "status": "completed",
+    "archivedAt": 1778652953.696718,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778652663.0107896,
+    "executionTime": 283.5980598926544
+  },
+  "task-ff298c935751": {
+    "taskId": "task-ff298c935751",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778652959.5086122,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778652881.3138947,
+    "executionTime": 65.29495477676392
+  },
+  "task-ca24e45afc9a": {
+    "taskId": "task-ca24e45afc9a",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778652972.711369,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778652881.3139277,
+    "executionTime": 65.294921875
+  },
+  "task-6f5f921bab9c": {
+    "taskId": "task-6f5f921bab9c",
+    "action": "vision_analyze_image",
+    "status": "completed",
+    "archivedAt": 1778653073.8244557,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778652986.1700583,
+    "executionTime": 75.72040343284607
+  },
+  "task-56bf3fb3a2e5": {
+    "taskId": "task-56bf3fb3a2e5",
+    "action": "robot.take_photo_and_show",
+    "status": "completed",
+    "archivedAt": 1778653491.0488272,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778653448.6124957,
+    "executionTime": 30.532690286636353
+  },
+  "task-a169c7c6dffb": {
+    "taskId": "task-a169c7c6dffb",
+    "action": "vision_analyze_image",
+    "status": "completed",
+    "archivedAt": 1778653542.5829308,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778653448.6125288,
+    "executionTime": 81.85377264022827
+  },
+  "task-43bbababf3b7": {
+    "taskId": "task-43bbababf3b7",
+    "action": "explore",
+    "status": "completed",
+    "archivedAt": 1778653665.2835813,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778653566.6636782,
+    "executionTime": 86.80380606651306
+  },
+  "task-fad5172bdfd0": {
+    "taskId": "task-fad5172bdfd0",
+    "action": "robot.look_left",
+    "status": "completed",
+    "archivedAt": 1778653786.4540803,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778653737.4972289,
+    "executionTime": 40.21683955192566
+  },
+  "task-340f3d879a89": {
+    "taskId": "task-340f3d879a89",
+    "action": "robot.look_right",
+    "status": "completed",
+    "archivedAt": 1778653792.8541875,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778653737.497264,
+    "executionTime": 40.21680808067322
+  },
+  "task-f9ba346d46b3": {
+    "taskId": "task-f9ba346d46b3",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778654486.594882,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778654446.2978566,
+    "executionTime": 30.61604619026184
+  },
+  "task-1b59418af42a": {
+    "taskId": "task-1b59418af42a",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778655045.483821,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778655012.1315997,
+    "executionTime": 20.768849849700928
+  },
+  "task-14b0b945f2c4": {
+    "taskId": "task-14b0b945f2c4",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778655466.8488765,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778655433.2701943,
+    "executionTime": 22.325762510299683
+  },
+  "task-eebf99ae3c75": {
+    "taskId": "task-eebf99ae3c75",
+    "action": "robot.move_forward",
+    "status": "completed",
+    "archivedAt": 1778655512.325109,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778655480.8071587,
+    "executionTime": 22.738891124725342
+  },
+  "task-c7a57719332a": {
+    "taskId": "task-c7a57719332a",
+    "action": "robot.reset_position",
+    "status": "completed",
+    "archivedAt": 1778660811.2395408,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778655524.6719103,
+    "executionTime": 24.624239683151245
+  },
+  "task-86baf5091be8": {
+    "taskId": "task-86baf5091be8",
+    "action": "robot.move_forward",
+    "status": "completed",
+    "archivedAt": 1778660880.2394497,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778660837.5191817,
+    "executionTime": 32.45025825500488
+  },
+  "task-3655b560c83a": {
+    "taskId": "task-3655b560c83a",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778661010.4057727,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778660960.3784785,
+    "executionTime": 35.25421476364136
+  },
+  "task-f52b5bb31be6": {
+    "taskId": "task-f52b5bb31be6",
+    "action": "web_search",
+    "status": "completed",
+    "archivedAt": 1778661079.2296662,
+    "archiveFile": "/home/ubuntu/minipupper-app/tasks_archive/2026-05-13.json",
+    "createdAt": 1778661045.2491097,
+    "executionTime": 22.24013614654541
+  }
+}

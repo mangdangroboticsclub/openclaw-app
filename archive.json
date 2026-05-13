@@ -1,0 +1,106 @@
+{
+  "tasks": {
+    "task-1778492798": {
+      "taskId": "task-1778492798",
+      "action": "robot.activate",
+      "params": {},
+      "userQuery": "",
+      "status": "completed",
+      "phase": "done",
+      "progress": 100,
+      "message": "Robot activated successfully",
+      "result": "Robot activated and body raised. L1 activation sequence completed.",
+      "error": null,
+      "announced": true,
+      "createdAt": 1778492798.6438992,
+      "updatedAt": 1778492988.8782148
+    },
+    "task-1778492929": {
+      "taskId": "task-1778492929",
+      "action": "web_search",
+      "params": {
+        "query": "weather in France right now"
+      },
+      "userQuery": "",
+      "status": "completed",
+      "phase": "done",
+      "progress": 100,
+      "message": "Task completed",
+      "result": "Current weather in France (week of May 11-17, 2026): Unstable, cool weather across most of France. Paris and \u00cele-de-France: highs 16-19\u00b0C, showers likely Monday through Friday, modest improvement by the weekend. Umbrella recommended, light clothing can stay tucked away.",
+      "error": null,
+      "announced": true,
+      "createdAt": 1778492929.250317,
+      "updatedAt": 1778493004.2687905
+    }
+  },
+  "task-1778493015": {
+    "taskId": "task-1778493015",
+    "action": "robot.press_button",
+    "params": {
+      "button": "L1"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "L1 button press completed",
+    "result": "Robot activation button (L1) pressed successfully.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778493015.1278872,
+    "updatedAt": 1778493053.6804423
+  },
+  "task-1778494487": {
+    "taskId": "task-1778494487",
+    "action": "robot.cancel_task",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "No active tasks to cancel",
+    "result": "No tasks were in progress. Cancel had no effect.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778494487.662837,
+    "updatedAt": 1778494514.9290378
+  },
+  "_last_archived": "2026-05-11",
+  "task-1778494536": {
+    "taskId": "task-1778494536",
+    "action": "robot.look_direction",
+    "params": {
+      "direction": "left"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Look left completed",
+    "result": "Robot looked left successfully.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778494536.3361945,
+    "updatedAt": 1778494575.2794998
+  },
+  "task-e781ac94913e": {
+    "action": "implement",
+    "announced": true,
+    "createdAt": 1778584622.6112206,
+    "error": null,
+    "feedback_required": true,
+    "message": "Person-follow module already exists and was verified",
+    "params": {
+      "context": "User asked 'can you follow me'",
+      "goal": "Follow the user with the camera",
+      "topic": "camera_person_follow"
+    },
+    "phase": "done",
+    "progress": 100,
+    "result": "Camera person-follow module already implemented by prior task. Verified: imports OK (OpenCV 4.10, NumPy), module loads, UDP protocol path exists, robot services active. Knowledge docs present. No new code needed - run with: python3 custom/camera_person_follow/main.py",
+    "status": "completed",
+    "taskId": "task-e781ac94913e",
+    "updatedAt": 1778584696.573984,
+    "userQuery": ""
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "task-1778492048": {
+    "taskId": "task-1778492048",
+    "action": "robot.move_right",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "completed",
+    "progress": 100,
+    "message": "Waiting for agent...",
+    "result": "Moved right for 1.0s",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778492048.780284,
+    "updatedAt": 1778492105.5536788
+  }
+}

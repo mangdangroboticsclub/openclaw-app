@@ -1,0 +1,19 @@
+{
+  "task-02bfb965630f": {
+    "taskId": "task-02bfb965630f",
+    "action": "web_search",
+    "params": {
+      "query": "weather in Paris"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Completed",
+    "result": "Paris, France - Tuesday, May 12, 2026: Sunny intervals and light winds. High 16\u00b0C (60\u00b0F), Low 8\u00b0C (47\u00b0F). Wind: 7 mph (11 km/h) westerly. Forecast: Wed 13th - Light rain showers, 15\u00b0C/5\u00b0C. Thu 14th - Thundery showers, 13\u00b0C/6\u00b0C.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778577159.8177018,
+    "updatedAt": 1778577204.5315685
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "tasks": {
+    "task-c7a57719332a": {
+      "taskId": "task-c7a57719332a",
+      "action": "robot.reset_position",
+      "params": {},
+      "userQuery": "",
+      "status": "completed",
+      "phase": "done",
+      "progress": 100,
+      "message": "Robot position reset successfully",
+      "result": "Robot reset and deactivated",
+      "error": null,
+      "announced": true,
+      "createdAt": 1778655524.6719103,
+      "updatedAt": 1778655549.29615
+    }
+  }
+}

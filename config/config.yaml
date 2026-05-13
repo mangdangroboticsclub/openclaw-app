@@ -1,0 +1,61 @@
+app:
+  debug: true
+  log_level: INFO
+  name: Minipupper Operator
+  version: 0.1.0
+audio:
+  asr:
+    compute_type: float16
+    device: cpu
+    engine: google
+    language: en-US
+    model: base
+    streaming: true
+  channels: 1
+  input_device: -1
+  output_device: -1
+  tts:
+    engine: google
+    pitch: 0.0
+    speed: 1.0
+    voice: en-US-Neural2-A
+  sample_rate: 16000
+barge_in:
+  aec_double_talk_ratio: 1.2
+  aec_enabled: true
+  aec_max_delay_ms: 180
+  aec_max_gain: 1.5
+  detection_timeout_ms: 90
+  echo_energy_ratio: 0.55
+  echo_suppression_threshold: 0.85
+  enabled: true
+  frame_duration_ms: 30
+  nearend_frames_required: 4
+  nearend_mic_to_playback_ratio: 1.15
+  nearend_min_cleaned_rms: 300.0
+  silence_duration_ms: 300
+  startup_grace_ms: 300
+  vad_aggressiveness: 2
+logging:
+  backup_count: 5
+  console_output: true
+  file: logs/minipupper_operator.log
+  max_file_size_mb: 50
+network:
+  default_port: 8888
+  gateway_url: ${OPENCLAW_GATEWAY_URL}
+  local_network: true
+  session_target: agent:main:dashboard:42e4abe5-8cad-4ab4-a38a-869fc1451fd9
+  tailscale_enabled: true
+  cron_job_id: b14924c7-a25a-4938-a7c2-3b6220ba5d62
+operator:
+  enable_tool_execution: true
+  llm_model: gemini-2.5-flash
+  llm_provider: gemini
+  max_context_length: 8192
+  max_response_tokens: 500
+  movements:
+    enabled: true
+    max_speed: 100
+  response_timeout_seconds: 30
+  role: minipupper_autonomous

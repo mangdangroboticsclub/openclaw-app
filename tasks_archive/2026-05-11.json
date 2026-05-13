@@ -1,0 +1,594 @@
+{
+  "task-1778487604": {
+    "taskId": "task-1778487604",
+    "action": "web_search",
+    "params": {
+      "query": "weather in Hong Kong"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Search complete",
+    "result": "Today (May 11): Sunny, High 27\u00b0C (80\u00b0F), Low 21\u00b0C (70\u00b0F), light south-westerly winds. Tue: Sunny intervals, 29/22\u00b0C. Wed: Sunny intervals, 29/24\u00b0C. Thu: Thundery showers, 27/22\u00b0C. Fri: Light rain showers, 27/23\u00b0C. Sat: Heavy rain, 27/22\u00b0C.",
+    "error": null,
+    "createdAt": 1778487604.8258584,
+    "updatedAt": 1778487604.8258586,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778487690": {
+    "taskId": "task-1778487690",
+    "action": "robot.move_right",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Robot strafed right for 1 second.",
+    "result": "move_right completed successfully (strafe right 1 second)",
+    "error": null,
+    "createdAt": 1778487690.0475361,
+    "updatedAt": 1778487690.0475364,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778487822": {
+    "taskId": "task-1778487822",
+    "action": "robot.activate",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Robot activated successfully",
+    "result": "Robot activated successfully. The robot is now standing and ready for movement commands.",
+    "error": null,
+    "createdAt": 1778487822.7426546,
+    "updatedAt": 1778487822.7426548,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778487918": {
+    "taskId": "task-1778487918",
+    "action": "task_status",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "System OK - agent online and ready",
+    "result": "ok",
+    "error": null,
+    "createdAt": 1778487918.2949913,
+    "updatedAt": 1778487939.968779,
+    "executionTime": 21.673787832260132
+  },
+  "task-1778487953": {
+    "taskId": "task-1778487953",
+    "action": "robot.move_right",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Moved right for 1.0s",
+    "result": "Moved right successfully",
+    "error": null,
+    "createdAt": 1778487953.1346262,
+    "updatedAt": 1778487993.3816206,
+    "executionTime": 40.246994495391846
+  },
+  "task-1778488019": {
+    "taskId": "task-1778488019",
+    "action": "robot.move_forward",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Robot moved forward for 1.0 second",
+    "result": "move_forward(1.0) completed successfully",
+    "error": null,
+    "createdAt": 1778488019.8271272,
+    "updatedAt": 1778488071.579232,
+    "executionTime": 51.75210475921631
+  },
+  "task-1778488112": {
+    "taskId": "task-1778488112",
+    "action": "web_search",
+    "params": {
+      "query": "current time in Indonesia"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Completed",
+    "result": "Current time in Indonesia (as of 08:28 UTC, Monday May 11, 2026):\n- Western Indonesia Time (WIB / GMT+7 \u2014 Jakarta, Sumatra, Java): **15:28 (3:28 PM)**\n- Central Indonesia Time (WITA / GMT+8 \u2014 Bali, Sulawesi, Kalimantan): **16:28 (4:28 PM)**\n- Eastern Indonesia Time (WIT / GMT+9 \u2014 Papua, Maluku): **17:28 (5:28 PM)**\n\nIndonesia has 3 time zones and does not observe daylight saving time.",
+    "error": null,
+    "createdAt": 1778488112.1295288,
+    "updatedAt": 1778488161.2834356,
+    "executionTime": 49.15390682220459
+  },
+  "task-1778486544": {
+    "taskId": "task-1778486544",
+    "action": "web_search",
+    "params": {
+      "query": "current exchange rate USD to HKD"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Task completed",
+    "result": "1 USD = 7.8296 HKD (mid-market rate as of 2026-05-11 08:02 UTC)",
+    "error": null,
+    "createdAt": 1778486544.8557742,
+    "updatedAt": 1778486544.8557744
+  },
+  "task-1778486591": {
+    "taskId": "task-1778486591",
+    "action": "robot.turn_left",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Task completed",
+    "result": "Turned left for 1.0 seconds",
+    "error": null,
+    "createdAt": 1778486591.3478727,
+    "updatedAt": 1778486591.3478732
+  },
+  "task-1778486743": {
+    "taskId": "task-1778486743",
+    "action": "robot.move_direction",
+    "params": {
+      "direction": "west"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Task completed",
+    "result": "Moved west (strafe left) for 2 seconds",
+    "error": null,
+    "createdAt": 1778486743.0127103,
+    "updatedAt": 1778486801.0262952
+  },
+  "task-1778486887": {
+    "taskId": "task-1778486887",
+    "action": "cancel_all_tasks",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Task completed",
+    "result": "Robot deactivated, all pending tasks cancelled",
+    "error": null,
+    "createdAt": 1778486887.512438,
+    "updatedAt": 1778486887.5124383
+  },
+  "task-test-cron-001": {
+    "taskId": "task-test-cron-001",
+    "action": "web_search",
+    "params": {
+      "query": "capital of France"
+    },
+    "userQuery": "what is the capital of France",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "The capital of France is Paris.",
+    "result": "Paris is the capital and largest city of France, located on the river Seine in the north-central part of the country.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778491285.2469661,
+    "updatedAt": 1778491285.2469664,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778491483": {
+    "taskId": "task-1778491483",
+    "action": "robot.step_right",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Executed step_right on robot",
+    "result": "Robot stepped right successfully",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778491483.8811653,
+    "updatedAt": 1778491945.014652
+  },
+  "task-1778492048": {
+    "taskId": "task-1778492048",
+    "action": "robot.move_right",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "completed",
+    "progress": 100,
+    "message": "Waiting for agent...",
+    "result": "Moved right for 1.0s",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778492048.780284,
+    "updatedAt": 1778492105.5536788,
+    "executionTime": 56.77339482307434
+  },
+  "task-1778492693": {
+    "taskId": "task-1778492693",
+    "action": "robot.move_right",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Moved right for 1.0s",
+    "result": "move_right completed successfully",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778492693.6526513,
+    "updatedAt": 1778492726.4530559,
+    "executionTime": 32.80040454864502
+  },
+  "task-1778492798": {
+    "taskId": "task-1778492798",
+    "action": "robot.activate",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Robot activated successfully",
+    "result": "Robot activated and body raised. L1 activation sequence completed.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778492798.6438992,
+    "updatedAt": 1778492798.6438997,
+    "executionTime": 4.76837158203125e-07
+  },
+  "task-1778492929": {
+    "taskId": "task-1778492929",
+    "action": "web_search",
+    "params": {
+      "query": "weather in France right now"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Task completed",
+    "result": "Current weather in France (week of May 11-17, 2026): Unstable, cool weather across most of France. Paris and \u00cele-de-France: highs 16-19\u00b0C, showers likely Monday through Friday, modest improvement by the weekend. Umbrella recommended, light clothing can stay tucked away.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778492929.250317,
+    "updatedAt": 1778492929.2503173,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-1778493015": {
+    "taskId": "task-1778493015",
+    "action": "robot.press_button",
+    "params": {
+      "button": "L1"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "L1 button press completed",
+    "result": "Robot activation button (L1) pressed successfully.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778493015.1278872,
+    "updatedAt": 1778493044.4784732,
+    "executionTime": 29.3505859375
+  },
+  "task-1778493062": {
+    "taskId": "task-1778493062",
+    "action": "robot.move_backward",
+    "params": {
+      "duration": 2.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "move_backward completed (2s)",
+    "result": "Robot moved backward for 2 seconds.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778493062.0035906,
+    "updatedAt": 1778493123.2533617,
+    "executionTime": 61.24977111816406
+  },
+  "task-1778493147": {
+    "taskId": "task-1778493147",
+    "action": "robot.turn_off",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Robot turn_off: service was already stopped, robot is off.",
+    "result": "Robot is turned off (robot.service was not running).",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778493147.5978148,
+    "updatedAt": 1778493219.2757862,
+    "executionTime": 71.67797136306763
+  },
+  "task-1778493235": {
+    "taskId": "task-1778493235",
+    "action": "robot.reset",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Robot reset sequence sent successfully",
+    "result": "Reset sequence (L1\u2192R1\u2192L1) executed. Robot activation state cleared.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778493235.8046658,
+    "updatedAt": 1778493998.904602,
+    "executionTime": 763.099936246872
+  },
+  "task-1778493968": {
+    "taskId": "task-1778493968",
+    "action": "web_search",
+    "params": {
+      "query": "weather in Brazil"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Found weather results for Brazil",
+    "result": "Weather search results for Brazil: 1) S\u00e3o Paulo 10-day forecast on weather.com, 2) Brazil current weather on AccuWeather, 3) Weather in 61 cities on timeanddate.com, 4) Brazil weather by month guide, 5) 3-14 day forecasts on world-weather.info. Brazil is in autumn (fall) in May - expect mild temperatures varying by region.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778493968.6261566,
+    "updatedAt": 1778493998.904608,
+    "executionTime": 30.278451442718506
+  },
+  "task-1778494050": {
+    "taskId": "task-1778494050",
+    "action": "web_search",
+    "params": {
+      "query": "weather in Hong Kong right now"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Weather search completed for Hong Kong",
+    "result": "Current weather in Hong Kong: \u2600\ufe0f Partly cloudy, 28\u00b0C (82\u00b0F), 70% humidity, wind from the northeast at 13 km/h. May weather in Hong Kong is typically warm and humid with occasional rain showers.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778494050.3591063,
+    "updatedAt": 1778494256.475685,
+    "executionTime": 206.11657857894897
+  },
+  "task-1778494199": {
+    "taskId": "task-1778494199",
+    "action": "web_search",
+    "params": {
+      "query": "weather in Hong Kong right now"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Weather search completed for Hong Kong",
+    "result": "Current weather in Hong Kong: \u2600\ufe0f Partly cloudy, 28\u00b0C (82\u00b0F), 70% humidity, wind from the northeast at 13 km/h. May weather in Hong Kong is typically warm and humid with occasional rain showers.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778494199.0656242,
+    "updatedAt": 1778494272.7865062,
+    "executionTime": 73.72088193893433
+  },
+  "task-1778494399": {
+    "taskId": "task-1778494399",
+    "action": "robot.detect_people",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "People detection not available - Mini Pupper has no camera or detection hardware",
+    "result": "Mini Pupper does not support people detection. It lacks a camera and people detection software. Available robot actions: init, move, trot, stop, reset, dance, hop.",
+    "error": "unsupported_action: robot.detect_people is not a supported action on this hardware",
+    "announced": false,
+    "createdAt": 1778494399.2465267,
+    "updatedAt": 1778695980,
+    "executionTime": 201580.75347328186
+  },
+  "task-1778494487": {
+    "taskId": "task-1778494487",
+    "action": "robot.cancel_task",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "No active tasks to cancel",
+    "result": "No tasks were in progress. Cancel had no effect.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778494487.662837,
+    "updatedAt": 1746960840.0,
+    "executionTime": 0
+  },
+  "task-1778494536": {
+    "taskId": "task-1778494536",
+    "action": "robot.look_direction",
+    "params": {
+      "direction": "left"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Look left completed",
+    "result": "Robot looked left successfully.",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778494536.3361945,
+    "updatedAt": 1778494569.281861,
+    "executionTime": 32.945666551589966
+  },
+  "task-1778494590": {
+    "taskId": "task-1778494590",
+    "action": "robot.look_direction",
+    "params": {
+      "direction": "right"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Look right completed",
+    "result": "Robot looked right successfully.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778494590.6667953,
+    "updatedAt": 1778494648.168287,
+    "executionTime": 57.50149178504944
+  },
+  "task-e0079319fd37": {
+    "taskId": "task-e0079319fd37",
+    "action": "robot.move_right",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Waiting for agent...",
+    "result": "Completed successfully",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778495833.498099,
+    "updatedAt": 1778495884.571918,
+    "executionTime": 51.07381892204285
+  },
+  "task-04314d4c27a1": {
+    "taskId": "task-04314d4c27a1",
+    "action": "robot.move_left",
+    "params": {
+      "duration": 1.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Waiting for agent...",
+    "result": "Completed successfully",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778495833.4981344,
+    "updatedAt": 1778495884.571918,
+    "executionTime": 51.07378363609314
+  },
+  "task-e21c36aa3e6c": {
+    "taskId": "task-e21c36aa3e6c",
+    "action": "robot.look_up",
+    "params": {
+      "duration": 5.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Look down completed",
+    "result": "Completed successfully",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778495903.412333,
+    "updatedAt": 1778496003.084432,
+    "executionTime": 99.67209887504578
+  },
+  "task-7eabb984bbf5": {
+    "taskId": "task-7eabb984bbf5",
+    "action": "robot.look_down",
+    "params": {
+      "duration": 3.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Look down completed",
+    "result": "Completed successfully",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778495903.4123662,
+    "updatedAt": 1778496003.084432,
+    "executionTime": 99.67206573486328
+  },
+  "task-abedf63469f9": {
+    "taskId": "task-abedf63469f9",
+    "action": "robot.take_photo_and_show",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Photo captured and displayed on screen",
+    "result": "Photo captured and displayed on screen",
+    "error": null,
+    "announced": false,
+    "createdAt": 1778496608.4475627,
+    "updatedAt": 1778496608.447563,
+    "executionTime": 2.384185791015625e-07
+  },
+  "task-8fbb3449f6e7": {
+    "taskId": "task-8fbb3449f6e7",
+    "action": "robot.analyze_image",
+    "params": {},
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Photo captured and displayed on screen",
+    "result": "Photo captured, displayed on screen, and saved to /tmp/photo_analyze.jpg",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778496656.4046962,
+    "updatedAt": 1778496752.1190195,
+    "executionTime": 95.71432328224182
+  },
+  "task-e0061a26ae30": {
+    "taskId": "task-e0061a26ae30",
+    "action": "robot.analyze_image",
+    "params": {
+      "analysis_type": "count_people"
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "Photo captured and analyzed for people count",
+    "result": "Photo captured from MIPI camera and displayed on ST7789 screen. Applied OpenCV HOG-based people detection on the image (480x640). Result: 0 people detected in the frame. The image had low brightness (mean 61/255) which may affect detection accuracy. Annotated image saved to /tmp/analyze_people_annotated.jpg.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778496792.464879,
+    "updatedAt": 1778496931.8300657,
+    "executionTime": 139.36518669128418
+  }
+}

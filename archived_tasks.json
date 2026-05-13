@@ -1,0 +1,19 @@
+{
+  "task-1778493062": {
+    "taskId": "task-1778493062",
+    "action": "robot.move_backward",
+    "params": {
+      "duration": 2.0
+    },
+    "userQuery": "",
+    "status": "completed",
+    "phase": "done",
+    "progress": 100,
+    "message": "move_backward completed (2s)",
+    "result": "Robot moved backward for 2 seconds.",
+    "error": null,
+    "announced": true,
+    "createdAt": 1778493062.0035906,
+    "updatedAt": 1778493130.234932
+  }
+}
