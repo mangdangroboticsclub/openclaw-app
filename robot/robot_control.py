@@ -106,9 +106,11 @@ def _build_movement(command: str, duration: float, angle: float):
 
     elif command in ("look-right", "look_right"):
         move.look_right()
+        # move.stop (time=1.5)
 
     elif command in ("look-left", "look_left"):
         move.look_left()
+        # move.stop (time=1.5)
 
     elif command in ("look-upper-left", "look_upperleft", "upper-left", "upperleft"):
         move.look_upperleft()
@@ -122,8 +124,12 @@ def _build_movement(command: str, duration: float, angle: float):
     elif command in ("lower-body", "lower_body", "lower"):
         move.height_move(ht=-0.03, time_uni=max(duration, 0.5), time_acc=0.5)
 
+    elif command == "squat":
+        move.height_move(ht=-0.04, time_uni=max(duration, 0.5), time_acc=0.5)
+        move.stop(time=1.5)
+
     elif command in ("body-row", "body_row", "roll"):
-        move.body_row(row_deg=angle if angle else 10, time_uni=1.0, time_acc=0.5)
+        move.body_row(row_deg=angle if angle else 10, time_uni=duration if duration else 1.0, time_acc=0.5)
 
     # ── Standing / Activation ──
     elif command in ("stop", "idle"):
@@ -154,11 +160,50 @@ def _build_movement(command: str, duration: float, angle: float):
         move.rotate(angle=90)
         move.rotate(angle=-90)
 
+    elif command == "disco":
+        move.look_upperright()
+        move.look_upperleft() 
+        move.look_upperright()
+        move.look_upperleft() 
+        move.look_upperright()
+        move.look_upperleft() 
+        move.look_upperright()
+        move.look_upperleft() 
+    
+    elif command == "fall":
+        move.height_move(ht=0.05, time_uni=0.5, time_acc=0.5)
+        # move.foreleg_lift("left", ht=0.03, time_uni=1.0, time_acc=0.1)
+        # move.height_move(ht=-0.02, time_uni=max(duration, 0.5), time_acc=0.1)
+        # move.right(v_x=0, v_y=-0.2, time_uni=duration, time_acc=0.1)
+        move.foreleg_lift("left", ht=0.5, time_uni=1, time_acc=0.05)
+        move.stop(time=0.1)
+        # move.stop(time=0.3)
+        # move.foreleg_lift("right", ht=0.06, time_uni=1.0, time_acc=0.1)
+
+    elif command == "left_kick":
+        move.stop(time=0.1)
+        move.kick("left", ht=0.1, time_uni=0.05, time_acc=0.05)
+        move.stop(time=0.1)
+
+    elif command == "right_kick":
+        # move.lift_kick ("right", ht=0.05, time_uni=1, time_acc=0.5)
+        move.kick("right", ht=0.1, time_uni=0.05, time_acc=0.05)
+        # move.stop(time=0.1)
+              
+        
+    elif command == "backleg_lift":
+        move.backleg_lift("right", ht=0.01, time_uni=1.5, time_acc=0.15)
+        move.stop(time=0.1)    
+        
     elif command == "greet":
-        move.foreleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
-        move.stop(time=0.5)
-        move.foreleg_lift("left", ht=0.04, time_uni=1.0, time_acc=0.5)
-        move.stop(time=0.5)
+        # move.foreleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
+        # # move.stop(time=0.5)
+        move.foreleg_lift("left", ht=0.05, time_uni=1.0, time_acc=0.5)
+        # # move.stop(time=0.5)
+        # move.backleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
+        # move.stop(time=0.5)
+        # # move.backleg_lift("left", ht=0.04, time_uni=1.0, time_acc=0.5)
+        # move.stop(time=0.5)
 
     else:
         raise ValueError(f"Unknown command: {command}")
@@ -194,13 +239,7 @@ def run_movement(movement_lib, timeout=30.0):
     start_time = time.time()
 
     # Estimate duration from movement params + 3s safety margin
-    est_duration = 10.0  # default fallback
-    if lib_length > 0:
-        try:
-            from src.MovementGroup import MovementGroups
-            est_duration = 15.0  # safe overestimate for most sequences
-        except Exception:
-            pass
+    est_duration = 15.0 if lib_length > 0 else 10.0
     hard_timeout = min(timeout, max(est_duration, 8.0))
 
     while True:

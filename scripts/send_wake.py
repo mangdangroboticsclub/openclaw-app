@@ -9,7 +9,6 @@ Called automatically by minipupper_operator.py after writing a pending task.
 Can also be run manually: python scripts/send_wake.py
 """
 
-import json
 import logging
 import os
 import sys
@@ -24,14 +23,22 @@ sys.path.insert(0, str(APP_ROOT))
 
 from src.openclaw.client import OpenClawClient, load_device_identity
 
+_cached_config = None
+
 
 def load_config():
+    global _cached_config
+    if _cached_config is not None:
+        return _cached_config
+
     config_path = APP_ROOT / 'config' / 'config.yaml'
     if config_path.exists():
         import yaml
         with open(config_path) as f:
-            return yaml.safe_load(f)
-    return {}
+            _cached_config = yaml.safe_load(f) or {}
+    else:
+        _cached_config = {}
+    return _cached_config
 
 
 def get_gateway_url():

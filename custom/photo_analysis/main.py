@@ -28,7 +28,6 @@ from vertexai.generative_models import GenerativeModel, Part, SafetySetting
 
 DEFAULT_PROMPT = "Describe this image in detail. What objects, people, text, colors, and environment do you see?"
 DEFAULT_MODEL = "gemini-2.5-flash"
-CAPTURE_RESOLUTION = (640, 480)
 
 
 # ── Camera ─────────────────────────────────────────────────────
@@ -258,7 +257,7 @@ def main():
     if args.save:
         with open(args.save, "w") as f:
             if args.json:
-                json.dump(json.loads(json.dumps(result)), f, indent=2)
+                json.dump(result, f, indent=2)
             else:
                 f.write(analysis)
         print(f"Analysis saved to {args.save}")

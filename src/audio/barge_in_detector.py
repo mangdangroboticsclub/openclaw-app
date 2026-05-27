@@ -39,7 +39,7 @@ class BargeInConfig:
     aec_max_gain: float = 1.2  # Max subtraction gain for reference echo
     aec_double_talk_ratio: float = 1.4  # Protect user speech when mic is much louder
     echo_suppression_threshold: float = 0.80  # Similarity threshold for suppressing playback echo
-    echo_energy_ratio: float = 0.45  # Mic/playback energy ratio under which a voiced frame is likely echo
+    echo_energy_ratio: float = 0.5  # Mic/playback energy ratio under which a voiced frame is likely echo
     nearend_min_cleaned_rms: float = 300.0  # Minimum cleaned RMS for near-end speech
     nearend_mic_to_playback_ratio: float = 1.15  # Mic must be louder than playback by this factor
     nearend_frames_required: int = 4  # Consecutive near-end speech frames to trigger
@@ -111,7 +111,6 @@ class BargeInDetector:
     def _is_likely_echo(self, mic_frame: bytes) -> bool:
         if not self._playback_queue:
             return False
-
         mic = np.frombuffer(mic_frame, dtype=np.int16).astype(np.float32)
         mic_energy = float(np.sqrt(np.mean(mic * mic))) if mic.size else 0.0
         if mic_energy <= 0.0:

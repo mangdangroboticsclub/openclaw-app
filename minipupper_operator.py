@@ -1068,26 +1068,52 @@ class MinipupperOperator:
         self._broadcast_status("Moving right")
     
     def _set_mute_volume(self):
-        """Set PulseAudio volume based on mute_mode flag.
+        """Set speaker volume based on mute_mode flag.
 
         In mute mode, sets speaker volume to 0% but keeps TTS pipeline running.
         When unmuted, restores to 100%.
+
+        Uses amixer (ALSA) for direct hardware volume control — no PulseAudio
+        dependency. Falls back to pactl if amixer is unavailable.
         """
+        import subprocess
+
+        volume = "0%" if self.mute_mode else "100%"
+
+        # Primary: amixer — works without PulseAudio
         try:
-            import subprocess
-            volume = "0%" if self.mute_mode else "100%"
-            # Try both AEC sink and direct PulseAudio default
-            subprocess.run(
-                ["pactl", "set-sink-volume", "aec_sink_hp", volume],
+            r = subprocess.run(
+                ["amixer", "-c", "0", "set", "Headphone", volume],
                 capture_output=True, timeout=2
             )
-            subprocess.run(
-                ["pactl", "set-sink-volume", "@DEFAULT_SINK@", volume],
-                capture_output=True, timeout=2
-            )
-            self.logger.info(f"Mute volume set to {volume}")
+            if r.returncode == 0:
+                self.logger.info("Speaker volume set to " + volume + " (amixer)")
+                return
+            else:
+                self.logger.debug(
+                    "amixer failed: " + r.stderr.decode().strip()
+                )
         except Exception as e:
-            self.logger.debug(f"Cannot set PulseAudio volume: {e}")
+            self.logger.debug("amixer not available: " + str(e))
+
+        # Fallback: pactl — requires PulseAudio
+        for sink in ("aec_sink_hp", "@DEFAULT_SINK@"):
+            try:
+                r = subprocess.run(
+                    ["pactl", "set-sink-volume", sink, volume],
+                    capture_output=True, timeout=2
+                )
+                if r.returncode == 0:
+                    self.logger.info(
+                        "Speaker volume set to " + volume + " (pactl: " + sink + ")"
+                    )
+                    return
+            except Exception:
+                pass
+
+        self.logger.warning(
+            "Cannot set speaker volume to " + volume
+        )
 
     def _broadcast_status(self, status: str):
         """Broadcast status update"""

@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.insert(0, os.path.expanduser("~/minipupper-app/scripts"))  # noqa: E402
 """
 Minipupper Phase 2 - Task File Watcher
 
@@ -38,13 +35,11 @@ class TaskWatcher:
         # Try to initialize the ST7789 LCD display for task status
         try:
             import sys as _sys
-            import os as _os
-            _sys.path.insert(0, _os.path.expanduser("~/minipupper-app/scripts"))
+            _sys.path.insert(0, os.path.expanduser("~/minipupper-app/scripts"))
             from display_task_info import TaskDisplay
             self._task_display = TaskDisplay()
         except Exception:
             pass
-        self.llm = llm  # main operator LLM (not used for announcements)
         self.announce_llm = announce_llm or llm  # dedicated LLM for announcements
         self.audio_manager = audio_manager
         self.archiver = TaskArchiver()
@@ -219,6 +214,12 @@ class TaskWatcher:
         self._announcing_progress_message = None
 
         # ── 3. GENERATE announcement text (own LLM, no thread contention) ──
+        # Normalize result to string for LLM prompt building
+        if isinstance(result, dict) or isinstance(result, list):
+            result_str = json.dumps(result, indent=2)
+        else:
+            result_str = str(result) if result is not None else ""
+
         if error:
             # Short path: don't bother LLM for errors
             announcement = f"Sorry, there was an error: {error}"
@@ -231,19 +232,19 @@ class TaskWatcher:
                     "because the task completed. "
                     "Progress that was interrupted: '" + interrupted_message + "'"
                 )
-            if action in ("web_search", "web_fetch", "query"):
+            if action in ("web_search", "web_fetch", "query", "food.analyze"):
                 action_label = action.replace('_', ' ')
                 prompt_parts.append(
                     "The task was: " + action_label + ". "
                     "The user asked about: '" + user_query + "'. "
-                    "Result: " + result + ". "
+                    "Result: " + result_str + ". "
                     "Summarize briefly and naturally in 1-2 sentences."
                 )
             else:
                 action_label = action.replace("_", " ").replace("robot", "").strip()
                 prompt_parts.append(
                     "The task '" + action_label + "' completed. "
-                    + ("Result: " + result if result else "")
+                    + ("Result: " + result_str if result_str else "")
                 )
 
             prompt = "\n".join(prompt_parts)
@@ -263,11 +264,14 @@ class TaskWatcher:
                 )
             except Exception as e:
                 logger.warning("TaskWatcher: LLM announcement failed: %s", e)
-                announcement = result if result else f"{action.replace('_', ' ')} completed."
+                announcement = result_str if result_str else f"{action.replace('_', ' ')} completed."
 
         logger.info("TaskWatcher: announcing result: %s", announcement[:200])
 
-        # ── 4. SPEAK via TTS ──────────────────────────────────────
+        # ── 4. Mark announced NOW so poll loop never re-enters ──
+        self._mark_announced(task_id)
+
+        # ── 5. SPEAK via TTS ──────────────────────────────────────
         tts_succeeded = False
         if self.audio_manager:
             try:
@@ -275,29 +279,20 @@ class TaskWatcher:
                 if completed:
                     tts_succeeded = True
                 else:
-                    logger.info("TaskWatcher: result interrupted by user, will retry once")
-                    import time as _t
-                    _t.sleep(1.0)
-                    try:
-                        completed = self.audio_manager.speak(announcement)
-                        if completed:
-                            tts_succeeded = True
-                    except Exception:
-                        pass
+                    logger.info("TaskWatcher: result interrupted by user")
             except Exception as e:
                 logger.error("TaskWatcher: TTS error: %s", e)
 
-        # ── 5. Only mark announced after successful TTS ────────────
+        # ── 6. Always inject result into Gemini's history ───────────
+        # (even if interrupted — user may ask about it later)
+        if self._on_result:
+            try:
+                self._on_result(task)
+            except Exception as _e:
+                logger.warning("TaskWatcher: on_result callback failed: %s", _e)
+
+        # ── 7. Archive only if TTS completed successfully ─────────
         if tts_succeeded:
-            self._mark_announced(task_id)
-
-            # Phase 3: Notify operator of completed task result
-            if self._on_result:
-                try:
-                    self._on_result(task)
-                except Exception as _e:
-                    logger.warning("TaskWatcher: on_result callback failed: %s", _e)
-
             logger.info("TaskWatcher: archiving and removing task %s", task_id[:8])
             try:
                 self.archiver.archive_task(task)
@@ -305,9 +300,8 @@ class TaskWatcher:
             except Exception as e:
                 logger.warning("TaskWatcher: archive/remove failed: %s", e)
         else:
-            logger.warning(
-                "TaskWatcher: TTS failed for task %s, leaving announced=False for retry",
-                task_id[:8])
+            logger.info(
+                "TaskWatcher: announced already set, will be cleaned up later")
 
     def _mark_announced(self, task_id: str):
         """Set announced=True on a completed task so cron cleanup can archive it."""

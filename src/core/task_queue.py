@@ -5,7 +5,6 @@ Last Updated: 2026-05-09
 """
 
 import queue
-import threading
 from typing import Any
 
 # Speech-to-Text: ASR engine → Input text queue

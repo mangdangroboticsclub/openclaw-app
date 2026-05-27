@@ -6,7 +6,6 @@ Draws current task status as text on the 320x240 display.
 Supports showing action name, status, phase, and progress.
 """
 
-import os
 import time
 from PIL import Image, ImageDraw, ImageFont
 from enum import Enum

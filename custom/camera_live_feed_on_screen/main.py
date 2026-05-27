@@ -25,24 +25,17 @@ import sys
 import time
 
 import cv2
-import numpy as np
 from PIL import Image
-
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-CAMERA_DEVICE = 0          # /dev/video0
+CAMERA_DEVICE = 0
 CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 DISPLAY_WIDTH = 320
 DISPLAY_HEIGHT = 240
-DISPLAY_BPP = ST7789 = None  # imported lazily
 
-
-# ---------------------------------------------------------------------------
-# Signal / quit handling
-# ---------------------------------------------------------------------------
 _running = True
 
 def _signal_handler(sig, frame):
@@ -52,11 +45,7 @@ def _signal_handler(sig, frame):
 signal.signal(signal.SIGINT, _signal_handler)
 signal.signal(signal.SIGTERM, _signal_handler)
 
-
 def _check_quit_key():
-    """Return True if 'q' has been pressed on OpenCV window.
-    Also respects global _running flag."""
-    global _running
     if not _running:
         return True
     try:
@@ -64,57 +53,41 @@ def _check_quit_key():
     except Exception:
         return False
 
-
 # ---------------------------------------------------------------------------
 # Camera
 # ---------------------------------------------------------------------------
 def open_camera():
-    """Open the MIPI CSI camera and configure for 640x480."""
     cap = cv2.VideoCapture(CAMERA_DEVICE)
     if not cap.isOpened():
-        print("ERROR: Could not open camera /dev/video0", file=sys.stderr)
+        print("ERROR: Could not open camera", file=sys.stderr)
         return None
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
-    # Let camera warm up
+    # Warm up
     for _ in range(5):
         cap.read()
     return cap
 
-
 def capture_frame(cap):
-    """Capture a single frame. Returns BGR numpy array or None."""
     ret, frame = cap.read()
-    if not ret or frame is None:
-        return None
-    return frame
-
+    return frame if ret else None
 
 def frame_to_display_image(frame_bgr):
-    """Convert BGR OpenCV frame → resized RGB PIL Image for display."""
     frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-    pil_img = Image.fromarray(frame_rgb)
-    return pil_img.resize((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-
+    return Image.fromarray(frame_rgb).resize((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
 # ---------------------------------------------------------------------------
-# Display (ST7789 LCD on Mini Pupper)
+# Display
 # ---------------------------------------------------------------------------
 def get_display():
-    """Initialize and return the Display object. Returns None on failure."""
     try:
         from MangDang.mini_pupper.display import Display
         return Display()
-    except ImportError:
-        print("ERROR: MangDang.mini_pupper.display not available", file=sys.stderr)
-        return None
-    except Exception as e:
+    except (ImportError, Exception) as e:
         print(f"ERROR: Display init failed: {e}", file=sys.stderr)
         return None
 
-
 def show_frame(disp, pil_img):
-    """Push a PIL Image to the LCD display."""
     try:
         disp.disp.display(pil_img)
         return True
@@ -122,134 +95,89 @@ def show_frame(disp, pil_img):
         print(f"WARN: Display write failed: {e}", file=sys.stderr)
         return False
 
-
 # ---------------------------------------------------------------------------
-# Optional video recording
+# Video recording
 # ---------------------------------------------------------------------------
 def setup_recorder(output_path, fps=15.0):
-    """Set up an MP4 video writer (XVID codec, 320x240)."""
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     writer = cv2.VideoWriter(output_path, fourcc, fps, (DISPLAY_WIDTH, DISPLAY_HEIGHT))
     if not writer.isOpened():
-        print(f"WARN: Could not open video writer for {output_path}", file=sys.stderr)
+        print(f"WARN: Could not open video writer", file=sys.stderr)
         return None
     return writer
-
 
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 def run_live_feed(duration=None, record_path=None):
-    """
-    Main live-feed loop.
-
-    Parameters
-    ----------
-    duration : float or None
-        Run for this many seconds, then stop. None = run until user quits.
-    record_path : str or None
-        If set, record video to this file.
-    """
     global _running
     _running = True
 
-    # -- Init camera --
     cap = open_camera()
     if cap is None:
         return 1
 
-    # -- Init display --
     disp = get_display()
     if disp is None:
         cap.release()
         return 1
 
-    # -- Init recorder (optional) --
     writer = None
     if record_path:
         writer = setup_recorder(record_path)
-        if writer is None:
-            print("Continuing without recording...")
 
-    # -- Timing --
     start_time = time.time()
     frame_count = 0
-    fps_report_interval = 5.0  # report FPS every 5 seconds
     last_fps_report = start_time
 
-    print("Live camera feed started. Press Ctrl+C or 'q' (on OpenCV window) to stop.")
+    print("Live feed started. Press Ctrl+C or 'q' to stop.")
     if duration:
         print(f"Auto-stopping after {duration:.0f} seconds.")
 
     try:
         while _running:
-            # Check duration limit
-            elapsed = time.time() - start_time
-            if duration and elapsed >= duration:
-                print(f"Duration limit reached ({duration:.0f}s). Stopping.")
+            if duration and (time.time() - start_time) >= duration:
                 break
 
-            # Capture
             frame = capture_frame(cap)
             if frame is None:
-                print("WARN: Frame capture failed, retrying...", file=sys.stderr)
                 time.sleep(0.05)
                 continue
 
-            # Convert and display
-            display_img = frame_to_display_image(frame)
-            show_frame(disp, display_img)
+            show_frame(disp, frame_to_display_image(frame))
 
-            # Record if desired
-            if writer is not None:
-                resized_rgb = cv2.resize(
-                    frame, (DISPLAY_WIDTH, DISPLAY_HEIGHT)
-                )
-                writer.write(
-                    cv2.cvtColor(resized_rgb, cv2.COLOR_RGB2BGR)
-                )
+            if writer:
+                writer.write(cv2.resize(frame, (DISPLAY_WIDTH, DISPLAY_HEIGHT)))
 
             frame_count += 1
 
-            # Periodic FPS report
-            if time.time() - last_fps_report >= fps_report_interval:
-                actual_fps = frame_count / (time.time() - last_fps_report)
-                print(f"  Feed running: ~{actual_fps:.1f} FPS, {frame_count} frames shown")
+            if time.time() - last_fps_report >= 5.0:
+                print(f"  ~{frame_count / 5.0:.1f} FPS, {frame_count} frames")
                 last_fps_report = time.time()
                 frame_count = 0
 
-            # Quick check for keyboard 'q'
             if _check_quit_key():
-                print("'q' pressed. Stopping.")
                 break
 
     except KeyboardInterrupt:
-        print("\nInterrupted by user.")
+        print("\nInterrupted.")
     except Exception as e:
-        print(f"ERROR in feed loop: {e}", file=sys.stderr)
+        print(f"ERROR: {e}", file=sys.stderr)
     finally:
-        # Cleanup
         cap.release()
-        if writer is not None:
+        if writer:
             writer.release()
-        # Show a blank screen on exit
         try:
-            blank = Image.new("RGB", (DISPLAY_WIDTH, DISPLAY_HEIGHT), (0, 0, 0))
-            show_frame(disp, blank)
+            show_frame(disp, Image.new("RGB", (DISPLAY_WIDTH, DISPLAY_HEIGHT), (0, 0, 0)))
         except Exception:
             pass
-        print("Live feed stopped. Screen cleared.")
+        print("Feed stopped.")
 
     return 0
 
-
 def test_feed_quick():
-    """
-    Quick self-test: run for 5 seconds and verify basic pipeline works.
-    """
-    print("=== Live Feed Self-Test (5 seconds) ===")
+    print("=== Self-Test (5 seconds) ===")
 
-    # 1. Camera check
     cap = open_camera()
     if cap is None:
         print("FAIL: Camera not available")
@@ -261,51 +189,38 @@ def test_feed_quick():
         return 1
     print(f"  Camera: OK ({frame.shape[1]}x{frame.shape[0]})")
 
-    # 2. Display check (import + resize)
-    disp = get_display()
-    if disp is None:
-        print("FAIL: Display not available (non-fatal if testing headless)")
+    if get_display() is None:
+        print("  Display: NOT AVAILABLE (non-fatal)")
     else:
-        print("  Display: OK (module loaded)")
+        print("  Display: OK")
 
-    # 3. Resize + color convert
     display_img = frame_to_display_image(frame)
-    assert display_img.size == (DISPLAY_WIDTH, DISPLAY_HEIGHT), \
-        f"Resize mismatch: {display_img.size} != ({DISPLAY_WIDTH},{DISPLAY_HEIGHT})"
-    print(f"  Image pipeline: OK ({display_img.size[0]}x{display_img.size[1]})")
-
-    # 4. Full 5s run
-    print("  Running 5-second feed...")
-    ret = run_live_feed(duration=5.0)
-    if ret != 0:
-        print(f"FAIL: run_live_feed returned {ret}")
+    if display_img.size == (DISPLAY_WIDTH, DISPLAY_HEIGHT):
+        print(f"  Image pipeline: OK ({display_img.size[0]}x{display_img.size[1]})")
+    else:
+        print(f"  Image pipeline: FAIL - size mismatch")
         return 1
-    print("  5-second feed: OK")
 
-    print("=== Self-test PASSED ===")
+    if run_live_feed(duration=5.0) != 0:
+        print("FAIL: Feed test failed")
+        return 1
+
+    print("=== Self-Test PASSED ===")
     return 0
-
 
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def main():
-    parser = argparse.ArgumentParser(
-        description="Mini Pupper - Live Camera Feed on ST7789 LCD"
-    )
-    parser.add_argument('--duration', type=float, default=None,
-                        help='Run for N seconds then stop (default: unlimited)')
-    parser.add_argument('--record', type=str, default=None,
-                        help='Record video to file (e.g. /tmp/feed.mp4)')
-    parser.add_argument('--test', action='store_true',
-                        help='Run quick 5-second self-test')
+    parser = argparse.ArgumentParser(description="Mini Pupper Live Camera Feed")
+    parser.add_argument('--duration', type=float, help='Run for N seconds')
+    parser.add_argument('--record', type=str, help='Record video to file')
+    parser.add_argument('--test', action='store_true', help='Run 5-second test')
     args = parser.parse_args()
 
     if args.test:
         return test_feed_quick()
-
     return run_live_feed(duration=args.duration, record_path=args.record)
-
 
 if __name__ == "__main__":
     sys.exit(main())
