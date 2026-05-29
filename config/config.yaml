@@ -26,13 +26,13 @@ barge_in:
   aec_max_delay_ms: 180
   aec_max_gain: 1.5
   detection_timeout_ms: 90
-  echo_energy_ratio: 0.55
+  echo_energy_ratio: 1.0 
   echo_suppression_threshold: 0.85
   enabled: true
   frame_duration_ms: 30
-  nearend_frames_required: 4
-  nearend_mic_to_playback_ratio: 1.15
-  nearend_min_cleaned_rms: 300.0
+  nearend_frames_required: 8         
+  nearend_mic_to_playback_ratio: 1.5  
+  nearend_min_cleaned_rms: 500      
   silence_duration_ms: 300
   startup_grace_ms: 300
   vad_aggressiveness: 2

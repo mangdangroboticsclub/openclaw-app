@@ -62,19 +62,45 @@ class TaskWatcher:
                      TASKS_FILE, POLL_INTERVAL)
 
     def _archive_old_completed(self):
-        """Archive completed tasks from previous app sessions silently."""
+        """Archive stale tasks from previous app sessions silently.
+
+        Iterates tasks in memory, archives each to disk, then removes
+        from the active file. The active file is rewritten once at the end
+        with only non-archivable tasks remaining.
+
+        Handles:
+        - completed/failed tasks (previous sessions)
+        - pending/running tasks (app crashed mid-task)
+        """
         tasks = self._load_tasks()
+        if not tasks:
+            return
+
+        kept = {}
         for task_id, task in tasks.items():
-            if task.get("status") in ("completed", "failed"):
+            status = task.get("status", "")
+            if status in ("completed", "failed"):
                 task["announced"] = True
                 try:
                     self.archiver.archive_task(task)
-                    self.archiver.remove_task_from_active(task_id)
-                    logger.info("TaskWatcher: archived and removed stale task %s (%s) on startup",
-                               task_id[:8], task.get("action", "?"))
+                    logger.info("TaskWatcher: archived stale %s task %s (%s) on startup",
+                               status, task_id[:8], task.get("action", "?"))
                 except Exception:
-                    pass
-        self._save_tasks(tasks)
+                    kept[task_id] = task
+            elif status in ("pending", "running"):
+                task["status"] = "archived"
+                task["announced"] = True
+                try:
+                    self.archiver.archive_task(task)
+                    logger.info("TaskWatcher: archived stale %s task %s (%s) on startup",
+                               status, task_id[:8], task.get("action", "?"))
+                except Exception:
+                    kept[task_id] = task
+            else:
+                kept[task_id] = task
+
+        # Rewrite active file with only non-archived tasks
+        self._save_tasks(kept)
 
     def stop(self):
         self._stop.set()
