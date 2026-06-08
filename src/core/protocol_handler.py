@@ -139,6 +139,7 @@ def handle_protocol_frame(frame: dict, llm, started_at: float = 0.0) -> Optional
 
     # Filter stale messages (arrived before app startup)
     msg_time = parsed.get("timestamp", 0)
+    # Skip messages that arrived before the app started
     if started_at > 0 and msg_time > 0 and msg_time < started_at - 1:
         logger.debug("Skipping stale protocol message from %.1f (started at %.1f)",
                      msg_time, started_at)
@@ -153,12 +154,18 @@ def handle_protocol_frame(frame: dict, llm, started_at: float = 0.0) -> Optional
         return None
 
     try:
+        # Build prompt and call LLM for a concise announcement
+        prompt = build_announcement_prompt(status)
         from src.core.llm_engine import Message
+
         messages = [
-            Message(role="system", content=(
-                "You are a concise status announcer for a robot operator. "
-                "Keep responses under 2 sentences. Sound natural and helpful."
-            )),
+            Message(
+                role="system",
+                content=(
+                    "You are a concise status announcer for a robot operator. "
+                    "Keep responses under 2 sentences. Sound natural and helpful."
+                ),
+            ),
             Message(role="user", content=prompt),
         ]
         announcement = llm.generate_response(messages=messages, max_tokens=80)

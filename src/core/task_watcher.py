@@ -70,7 +70,7 @@ class TaskWatcher:
 
         Handles:
         - completed/failed tasks (previous sessions)
-        - pending/running tasks (app crashed mid-task)
+        - pending/running/feedback_required/processing tasks (app crashed mid-task or unconfirmed)
         """
         tasks = self._load_tasks()
         if not tasks:
@@ -87,7 +87,7 @@ class TaskWatcher:
                                status, task_id[:8], task.get("action", "?"))
                 except Exception:
                     kept[task_id] = task
-            elif status in ("pending", "running"):
+            elif status in ("pending", "running", "feedback_required", "processing"):
                 task["status"] = "archived"
                 task["announced"] = True
                 try:
@@ -118,6 +118,12 @@ class TaskWatcher:
                 return data["tasks"]
             # Legacy flat format: {"task-id": {...}, ...}
             if isinstance(data, dict):
+                # Normalize: LLM sometimes invents statuses like "pending_feedback"
+                # TaskWatcher only announces "completed" or "failed" tasks
+                for task in data.values():
+                    result = task.get("result")
+                    if isinstance(result, dict) and result.get("feedback_required"):
+                        task["status"] = "completed"
                 return data
             return {}
         except (json.JSONDecodeError, OSError) as e:
@@ -176,6 +182,9 @@ class TaskWatcher:
 
     def _announce_progress(self, task: dict):
         """Announce a progress update using the dedicated announce LLM."""
+        # Skip TTS if music is playing (dance audio, etc.)
+        if os.path.exists("/tmp/minipupper_dance_active") or os.path.exists("/tmp/minipupper_music_active"):
+            return
         phase = task.get("phase", "")
         progress = task.get("progress", 0)
         message = task.get("message", "")
@@ -350,7 +359,7 @@ class TaskWatcher:
             priority = -1
             for tid, task in tasks.items():
                 s = task.get("status", "")
-                p = {"running": 3, "pending": 2, "completed": 1, "failed": 1}.get(s, 0)
+                p = {"running": 3, "processing": 3, "pending": 2, "completed": 1, "failed": 1}.get(s, 0)
                 if p > priority:
                     priority = p
                     display_task = task

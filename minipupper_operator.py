@@ -15,7 +15,6 @@ from typing import Dict, Any, Optional
 import time
 import re
 import argparse
-from dataclasses import dataclass, field
 
 try:
     from dotenv import load_dotenv
@@ -32,6 +31,7 @@ from src.audio.barge_in_detector import BargeInConfig
 from src.core.llm_engine import create_llm_provider, Message
 from src.core.task_watcher import TaskWatcher
 from src.openclaw.client import OpenClawClient, load_device_identity
+from src.core.task_archiver import TaskArchiver
 
 # Setup logging
 logging.basicConfig(
@@ -221,7 +221,6 @@ class MinipupperOperator:
                     self.logger.info("Phase 3: Pre-injected %d existing implementations into conversation history", len(_existing))
         except Exception as _e:
             self.logger.warning("Phase 3: Failed to pre-inject knowledge: %s", _e)
-        self.checkpoint = None
         
         # CLI flags
         self.keyboard_mode = keyboard
@@ -283,6 +282,42 @@ class MinipupperOperator:
         except ValueError:
             self.logger.warning(f"Invalid integer for {name}: {value!r}; using {default}")
             return int(default)
+
+    def _archive_stale_tasks(self):
+        """Clear ALL tasks from tasks.json on startup, archiving first."""
+
+        tasks_file = os.path.expanduser("~/minipupper-app/tasks.json")
+        if not os.path.exists(tasks_file):
+            return
+
+        try:
+            with open(tasks_file) as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return
+
+        tasks = data.get("tasks", {})
+        count = len(tasks)
+        if count == 0:
+            return
+
+        # Archive everything first (preserves history)
+        archiver = TaskArchiver()
+        for task_id, task in list(tasks.items()):
+            archiver.archive_and_remove(task, tasks_file)
+
+        # Then wipe the file clean
+        try:
+            with open(tasks_file, "w") as f:
+                json.dump({"tasks": {}}, f)
+        except OSError as e:
+            self.logger.warning("Failed to clear tasks.json: %s", e)
+            return
+
+        self.logger.info(
+            "Cleared %d task(s) from tasks.json on startup.",
+            count
+        )
     
     def start(self):
         """Start the operator"""
@@ -299,9 +334,11 @@ class MinipupperOperator:
         # Phase 2: Start file-based task watcher
         if hasattr(self, 'task_watcher') and self.task_watcher:
             self.task_watcher.start()
+
+        # Phase 2: Archive stale completed tasks so tasks.json starts clean
+        self._archive_stale_tasks()
         
         self.logger.info("Minipupper Operator started")
-        self._broadcast_status("Operator ready")
     
     def stop(self):
         """Stop the operator gracefully"""
@@ -351,14 +388,6 @@ class MinipupperOperator:
         op_thread.start()
         self._worker_threads.append(op_thread)
         
-        # Movement Worker - executes movement commands
-        move_thread = threading.Thread(
-            target=self._movement_worker,
-            daemon=True,
-            name="MovementWorker"
-        )
-        move_thread.start()
-        self._worker_threads.append(move_thread)
         
         # Control Worker - handles system commands
         control_thread = threading.Thread(
@@ -494,7 +523,6 @@ class MinipupperOperator:
 
                 self.logger.info(f"Operator processing: {text}")
                 self.current_state = "processing"
-                self._broadcast_status("Processing your request...")
 
                 # Phase 3: Drain any completed task results into conversation history,
                 # so Gemini knows what happened and can follow up properly.
@@ -556,7 +584,6 @@ class MinipupperOperator:
                         interrupted = not self.audio_manager.speak(response)
                         if interrupted:
                             self.logger.info("Speech playback stopped")
-                            self._broadcast_status("Speech playback stopped")
                     except Exception as e:
                         self.logger.error(f"TTS Error: {e}")
                 
@@ -625,52 +652,6 @@ class MinipupperOperator:
             if self.gateway_client:
                 self.gateway_client.stop()
 
-    @dataclass
-    class Checkpoint:
-        phase: str = ""
-        last_transcript: str = ""
-        last_agent_response: str = ""
-        last_agent_response_at: float = 0.0
-        last_status_announced: str = ""
-        last_status_at: float = 0.0
-        agent_processing_started_at: float = 0.0
-        agent_processing_seconds: float = 0.0
-        pending_barge_in: bool = False
-        error_count: int = 0
-        gateway_connected: bool = False
-        last_gateway_disconnect_at: float = 0.0
-        progress: float = 0.0
-        raw: dict = field(default_factory=dict)
-
-    def _is_significant_update(self, old: Optional['MinipupperOperator.Checkpoint'], new: 'MinipupperOperator.Checkpoint') -> bool:
-        """Decide whether new checkpoint represents a significant update to announce.
-
-        Heuristic: phase change, progress increased >=10%, or status text changed.
-        Completion (progress>=100 or phase=="finished") is always significant.
-        """
-        if old is None:
-            return True
-
-        if new.phase and new.phase != old.phase:
-            return True
-
-        # completion
-        if (new.phase and new.phase.lower() in ("finished", "complete", "done")) or new.progress >= 100.0:
-            if old.progress < 100.0:
-                return True
-
-        # progress jump
-        try:
-            if new.progress - old.progress >= 10.0:
-                return True
-        except Exception:
-            pass
-
-        # status text changed
-        if new.last_agent_response and new.last_agent_response != old.last_agent_response:
-            return True
-
-        return False
 
     def _handle_openclaw_frame(self, frame: dict):
         """Process raw frame from OpenClaw Gateway and potentially announce via LLM.
@@ -706,100 +687,7 @@ class MinipupperOperator:
         # handles everything.
         return
 
-        # Legacy fallback: Build a minimal checkpoint from the frame
-        # Phase 2: Skip stale messages (older than 120s before startup)
-        if hasattr(self, '_started_at'):
-            msg_ts = frame.get('payload', {}).get('message', {}).get('timestamp', 0)
-            if msg_ts and msg_ts < self._started_at:
-                return
-        cp = MinipupperOperator.Checkpoint()
-        cp.raw = frame
-        cp.gateway_connected = True
-        cp.last_status_at = time.time()
-
-        # Try to extract common fields
-        payload = frame.get('payload', {}) if isinstance(frame, dict) else {}
-        # session.message -> assistant content
-        if frame.get('event') == 'session.message':
-            msg = payload.get('message', {})
-            role = msg.get('role')
-            content = msg.get('content')
-            if role == 'assistant' and content:
-                cp.last_agent_response = content
-                # try to detect progress like "progress: 42%" or numeric
-                # naive parse: look for pattern "%" in content
-                try:
-                    if '%' in content:
-                        # extract first number before %
-                        import re
-                        m = re.search(r"(\d{1,3})%", content)
-                        if m:
-                            cp.progress = float(m.group(1))
-                except Exception:
-                    pass
-
-        # Some frames may include explicit status/progress fields
-        if isinstance(payload, dict):
-            if 'status' in payload:
-                cp.last_agent_response = str(payload.get('status'))
-            if 'progress' in payload:
-                try:
-                    cp.progress = float(payload.get('progress') or 0.0)
-                except Exception:
-                    pass
-            if 'phase' in payload:
-                cp.phase = str(payload.get('phase'))
-
-        significant = self._is_significant_update(self.checkpoint, cp)
-        # update stored checkpoint
-        self.checkpoint = cp
-
-        if not significant:
-            return
-
-        # Build an announcement via LLM to be concise and friendly
-        try:
-            prompt = [
-                Message(role='system', content='You are a concise status announcer for a robot operator.'),
-                Message(role='user', content=f"Summarize this status update briefly for a user: {cp.last_agent_response or cp.phase or cp.progress}")
-            ]
-            announcement = self.llm.generate_response(messages=prompt, max_tokens=80)
-        except Exception:
-            pass
-            # Phase 2d: No legacy fallback — file-based protocol only
-            return
-            # Fallback to raw text
-            if cp.last_agent_response:
-                announcement = cp.last_agent_response
-            elif cp.phase:
-                announcement = f"Task phase: {cp.phase}"
-            else:
-                announcement = f"Progress: {cp.progress}%"
-
-        # Keep Gateway updates as logs only.
-        # TTS should speak only direct LLM output from user interactions.
-        try:
-            self.logger.info("Gateway response: %s", announcement[:200])
-        except Exception as e:
-            self.logger.error("Error handling Gateway response: %s", e)
     
-    def _movement_worker(self):
-        """Worker: Execute movement commands"""
-        self.logger.info("Movement Worker started")
-        
-        while self.is_running:
-            try:
-                # Check for movement commands
-                try:
-                    command = movement_queue.get(timeout=1.0)
-                except:
-                    continue
-                
-                # Execute movement
-                self._execute_movement(command)
-                
-            except Exception as e:
-                self.logger.error(f"Movement Worker error: {e}")
     
     def _control_worker(self):
         """Worker: Handle system control commands"""
@@ -857,10 +745,7 @@ class MinipupperOperator:
         try:
             # Store in conversation history
             self.conversation_history.append(Message(role="user", content=text))
-            
-            # Limit context window to prevent token overflow
-            max_context = self.config.get('operator', {}).get('max_context_length', 8192)
-            messages_for_llm = self._get_context_messages(max_context)
+            messages_for_llm = self._get_context_messages()
             
             # Generate response using LLM (Gemini)
             response = self.llm.generate_response(
@@ -916,14 +801,13 @@ class MinipupperOperator:
 
         return spoken_text, task_payloads
     
-    def _get_context_messages(self, max_tokens: int) -> list:
+    def _get_context_messages(self) -> list:
         """
         Get conversation history for LLM context.
         
         Keeps recent messages up to token limit.
         
         Args:
-            max_tokens: Maximum tokens to keep in context
             
         Returns:
             List of Message objects for LLM
@@ -1012,61 +896,11 @@ class MinipupperOperator:
 
         return False
     
-    def _execute_movement(self, command: str):
-        """
-        Execute movement command.
-        
-        Args:
-            command: Movement command string
-        """
-        self.logger.info(f"Executing movement: {command}")
-        
-        # TODO: Implement actual movement commands
-        # Map commands to motor control
-        movements = {
-            "sit": self._sit,
-            "stand": self._stand,
-            "forward": self._move_forward,
-            "backward": self._move_backward,
-            "left": self._move_left,
-            "right": self._move_right,
-        }
-        
-        if command in movements:
-            movements[command]()
-        else:
-            self.logger.warning(f"Unknown movement: {command}")
     
-    # Movement placeholders
-    def _sit(self):
-        """Sit down"""
-        self.logger.debug("Robot sitting")
-        self._broadcast_status("Sitting")
     
-    def _stand(self):
-        """Stand up"""
-        self.logger.debug("Robot standing")
-        self._broadcast_status("Standing")
     
-    def _move_forward(self):
-        """Move forward"""
-        self.logger.debug("Moving forward")
-        self._broadcast_status("Moving forward")
     
-    def _move_backward(self):
-        """Move backward"""
-        self.logger.debug("Moving backward")
-        self._broadcast_status("Moving backward")
     
-    def _move_left(self):
-        """Move left"""
-        self.logger.debug("Moving left")
-        self._broadcast_status("Moving left")
-    
-    def _move_right(self):
-        """Move right"""
-        self.logger.debug("Moving right")
-        self._broadcast_status("Moving right")
     
     def _set_mute_volume(self):
         """Sync mute state to AudioManager and set speaker to idle volume.
@@ -1077,12 +911,6 @@ class MinipupperOperator:
         self.audio_manager.mute_mode = self.mute_mode
         self.audio_manager._set_volume(tts_active=False)
 
-    def _broadcast_status(self, status: str):
-        """Broadcast status update"""
-        try:
-            status_queue.put(status, timeout=0.1)
-        except:
-            pass  # Queue full, skip update
 
 
 def main():

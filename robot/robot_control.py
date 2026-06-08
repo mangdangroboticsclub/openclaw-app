@@ -57,7 +57,7 @@ _display = Display()
 #  MovementLib Builders
 # ═══════════════════════════════════════════════════════════════════
 
-def _build_movement(command: str, duration: float, angle: float):
+def _build_movement(command: str, duration: float, angle: float, time_acc: float = 0.5):
     """
     Build a MovementLib list for a single command.
 
@@ -99,24 +99,25 @@ def _build_movement(command: str, duration: float, angle: float):
 
     # ── Posture (Level 2) ──
     elif command in ("look-up", "look_up"):
-        move.look_up()
+        move.head_move(pitch_deg=20, yaw_deg=0, time_uni=duration, time_acc=time_acc)
 
     elif command in ("look-down", "look_down"):
-        move.look_down()
+        move.head_move(pitch_deg=-20, yaw_deg=0, time_uni=duration, time_acc=time_acc)
+        # move.stop(time=0.1)
 
     elif command in ("look-right", "look_right"):
-        move.look_right()
-        # move.stop (time=1.5)
+        move.head_move(pitch_deg=0, yaw_deg=30, time_uni=duration, time_acc=time_acc)
 
     elif command in ("look-left", "look_left"):
-        move.look_left()
-        # move.stop (time=1.5)
+        move.head_move(pitch_deg=0, yaw_deg=-30, time_uni=duration, time_acc=time_acc)
 
     elif command in ("look-upper-left", "look_upperleft", "upper-left", "upperleft"):
-        move.look_upperleft()
+        move.head_move(pitch_deg=15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)
+        
 
     elif command in ("look-upper-right", "look_upperright", "upper-right", "upperright"):
-        move.look_upperright()
+        move.head_move(pitch_deg=15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+        
 
     elif command in ("raise-body", "raise_body", "raise"):
         move.height_move(ht=0.03, time_uni=max(duration, 0.5), time_acc=0.5)
@@ -129,7 +130,7 @@ def _build_movement(command: str, duration: float, angle: float):
         move.stop(time=1.5)
 
     elif command in ("body-row", "body_row", "roll"):
-        move.body_row(row_deg=angle if angle else 10, time_uni=duration if duration else 1.0, time_acc=0.5)
+        move.body_row(row_deg=angle if angle else 10, time_uni=duration if duration else 1.0, time_acc=time_acc)
 
     # ── Standing / Activation ──
     elif command in ("stop", "idle"):
@@ -147,41 +148,45 @@ def _build_movement(command: str, duration: float, angle: float):
     elif command in ("follow-person", "follow_person", "follow"):
         # Run the person follower (uses ContinuousController internally)
         # This just activates and stands - the actual follower runs separately
-        move.gait_uni(v_x=0.05, v_y=0, time_uni=0.5, time_acc=0.3)
+        move.gait_uni(v_x=0.05, v_y=0, time_uni=0.5, time_acc=0.5)
         move.stop(time=0.5)
 
     elif command == "dance":
-        move.move_forward()
-        move.move_backward()
-        move.move_right()
-        move.move_left()
+        # move.move_forward()
+        # move.move_backward()
+        # move.move_right()
+        # move.move_left()
         move.look_up()
         move.look_down()
-        move.rotate(angle=90)
-        move.rotate(angle=-90)
+        move.stop()
+        # move.rotate(angle=90)
+        # move.rotate(angle=-90)
 
     elif command == "disco":
         move.look_upperright()
         move.look_upperleft() 
-        move.look_upperright()
-        move.look_upperleft() 
-        move.look_upperright()
-        move.look_upperleft() 
-        move.look_upperright()
-        move.look_upperleft() 
+        # move.look_upperright()
+        # move.look_upperleft() 
+        # move.look_upperright()
+        # move.look_upperleft() 
+        # move.look_upperright()
+        # move.look_upperleft() 
     
     elif command == "fall":
         move.height_move(ht=0.05, time_uni=0.5, time_acc=0.5)
-        # move.foreleg_lift("left", ht=0.03, time_uni=1.0, time_acc=0.1)
-        # move.height_move(ht=-0.02, time_uni=max(duration, 0.5), time_acc=0.1)
-        # move.right(v_x=0, v_y=-0.2, time_uni=duration, time_acc=0.1)
+        # move.foreleg_lift("left", ht=0.03, time_uni=1.0, time_acc=0.5)
+        # move.height_move(ht=-0.02, time_uni=max(duration, 0.5), time_acc=0.5)
+        # move.right(v_x=0, v_y=-0.2, time_uni=duration, time_acc=0.5)
         move.foreleg_lift("left", ht=0.5, time_uni=1, time_acc=0.05)
         move.stop(time=0.1)
         # move.stop(time=0.3)
-        # move.foreleg_lift("right", ht=0.06, time_uni=1.0, time_acc=0.1)
+        # move.foreleg_lift("right", ht=0.06, time_uni=1.0, time_acc=0.5)
 
-    elif command == "left_kick":
-        move.stop(time=0.1)
+    elif command == "left_kick": 
+        # move.look_up() 
+        # move.stop(time=0.1)      
+        # move.gait_uni(v_x=0.2, v_y=0, time_uni=0.1, time_acc=0.5)        
+        # move.stop(time=0.3)
         move.kick("left", ht=0.1, time_uni=0.05, time_acc=0.05)
         move.stop(time=0.1)
 
@@ -196,10 +201,10 @@ def _build_movement(command: str, duration: float, angle: float):
         move.stop(time=0.1)    
         
     elif command == "greet":
-        # move.foreleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
-        # # move.stop(time=0.5)
+        move.foreleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
+        move.stop(time=0.1)
         move.foreleg_lift("left", ht=0.05, time_uni=1.0, time_acc=0.5)
-        # # move.stop(time=0.5)
+        move.stop(time=0.1)
         # move.backleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
         # move.stop(time=0.5)
         # # move.backleg_lift("left", ht=0.04, time_uni=1.0, time_acc=0.5)
@@ -215,7 +220,7 @@ def _build_movement(command: str, duration: float, angle: float):
 #  Execution Engine
 # ═══════════════════════════════════════════════════════════════════
 
-def run_movement(movement_lib, timeout=30.0):
+def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
     """
     Execute a MovementLib directly on the robot hardware.
 
@@ -229,7 +234,7 @@ def run_movement(movement_lib, timeout=30.0):
     Returns:
         True on success, False on timeout/error
     """
-    movement_ctl = MovementScheme(movement_lib)
+    movement_ctl = MovementScheme(movement_lib, initial_attitude)
     lib_length = len(movement_lib)
 
     command = Command()
@@ -239,7 +244,8 @@ def run_movement(movement_lib, timeout=30.0):
     start_time = time.time()
 
     # Estimate duration from movement params + 3s safety margin
-    est_duration = 15.0 if lib_length > 0 else 10.0
+    est_duration = max(15.0, lib_length * 0.5 + 5.0)
+
     hard_timeout = min(timeout, max(est_duration, 8.0))
 
     while True:
@@ -253,7 +259,7 @@ def run_movement(movement_lib, timeout=30.0):
         # Safety timeout
         if elapsed > hard_timeout:
             print(f"ERROR: Execution timed out after {elapsed:.1f}s", file=sys.stderr)
-            return False
+            return False, list(movement_ctl.attitude_now)
 
         # Orientation (no IMU for CLI commands)
         _state.quat_orientation = np.array([1, 0, 0, 0])
@@ -283,7 +289,7 @@ def run_movement(movement_lib, timeout=30.0):
         if scheme_done or time_done:
             break
 
-    return True
+    return True, list(movement_ctl.attitude_now)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -300,8 +306,8 @@ def main():
         help="Command and optional arguments: {cmd} {duration|angle}",
     )
     parser.add_argument(
-        "--duration", type=float, default=1.0,
-        help="Duration in seconds (default: 1.0, for movement commands)",
+        "--duration", type=float, default=0.05,
+        help="Duration in seconds (default: 0.5, for movement commands)",
     )
     parser.add_argument(
         "--angle", type=float, default=None,
@@ -355,7 +361,7 @@ def main():
         return 1
 
     print("Executing...")
-    success = run_movement(lib)
+    success, _ = run_movement(lib)
 
     if success:
         print(f"ok: {cmd}")

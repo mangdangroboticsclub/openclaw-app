@@ -577,33 +577,37 @@ class AudioManager:
         sd.stop()
 
     def _set_volume(self, tts_active: bool = False):
-        """Set speaker volume based on mute_mode and TTS activity.
+        """Set speaker volume.
 
         mute_mode=True   -> always 0% (user explicitly wants silence)
-        mute_mode=False  -> 85% during TTS, 0% otherwise.
+        mute_mode=False  -> always 85% (no idle mute — avoids getting stuck at 0%)
         """
+        import os
         import subprocess
 
         if self.mute_mode:
             volume = "0%"
         else:
-            volume = "85%" if tts_active else "0%"
+            volume = "85%"
 
-        # Primary: amixer
+        # Primary: amixer (auto-detect card)
         try:
-            r = subprocess.run(
-                ["amixer", "-c", "0", "set", "Headphone", volume],
-                capture_output=True, timeout=2
-            )
-            if r.returncode == 0:
+            from minipupper_app.src.audio.audio_util import set_volume as _av_set_volume
+        except ImportError:
+            try:
+                import sys
+                sys.path.insert(0, "/home/ubuntu/minipupper-app")
+                from src.audio.audio_util import set_volume as _av_set_volume
+            except Exception:
+                _av_set_volume = None
+        if _av_set_volume:
+            ok = _av_set_volume(volume)
+            if ok:
                 self.logger.info("Speaker volume set to " + volume + " (amixer)")
                 return
-            else:
-                self.logger.debug(
-                    "amixer failed: " + r.stderr.decode().strip()
-                )
-        except Exception as e:
-            self.logger.debug("amixer not available: " + str(e))
+            self.logger.debug("audio_util.set_volume failed for " + volume)
+        else:
+            self.logger.debug("audio_util not available")
 
         # Fallback: pactl
         for sink in ("aec_sink_hp", "@DEFAULT_SINK@"):

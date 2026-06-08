@@ -15,8 +15,8 @@ This allows:
 """
 
 import json
-import logging
 import os
+import logging
 import threading
 import time
 from datetime import datetime
@@ -54,7 +54,7 @@ class TaskArchiver:
         """
         if task_date is None:
             task_date = time.time()
-        
+
         date_str = datetime.fromtimestamp(task_date).strftime("%Y-%m-%d")
         return os.path.join(ARCHIVE_DIR, f"{date_str}.json")
 
@@ -75,12 +75,31 @@ class TaskArchiver:
             json.dump(index, f, indent=2)
 
     def _load_archive_file(self, archive_file: str) -> dict:
-        """Load tasks from a specific archive file."""
+        """Load tasks from a specific archive file.
+        
+        Handles both dict format {"task-id": task, ...} and list format
+        [{"task-id": task}, ...] for backward compatibility.
+        """
         if not os.path.exists(archive_file):
             return {}
         try:
             with open(archive_file) as f:
-                return json.load(f)
+                data = json.load(f)
+            # Already a dict — use as-is
+            if isinstance(data, dict):
+                return data
+            # List of task dicts — convert to dict keyed by taskId
+            if isinstance(data, list):
+                converted = {}
+                for item in data:
+                    if isinstance(item, dict):
+                        for tid, tdata in item.items():
+                            if isinstance(tdata, dict):
+                                converted[tid] = tdata
+                            else:
+                                converted[tid] = tdata
+                return converted
+            return {}
         except (json.JSONDecodeError, OSError) as e:
             logger.warning("TaskArchiver: could not read archive file %s: %s",
                           archive_file, e)
