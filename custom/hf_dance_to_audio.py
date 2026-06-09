@@ -219,30 +219,35 @@ def _hf_detect_beats(wav_path: str, genre: str = None) -> dict:
     event_id = predict_resp.json().get("event_id")
     _log(f"Event: {event_id}")
 
-    # Poll for result
-    deadline = _time.time() + 90
-    while _time.time() < deadline:
-        poll = requests.get(
-            f"https://{HF_SPACE.replace(chr(47), chr(45))}.hf.space/gradio_api/call/predict/{event_id}",
-            headers={"Accept": "text/event-stream"},
-            timeout=90,
-        )
-        text = poll.text.strip()
-        for line in text.split(chr(10)):
-            if line.startswith("data:"):
-                raw = line[5:].strip()
-                if raw and raw != "null":
-                    elapsed = _time.time() - t0
-                    _log(f"HF response received in {elapsed:.1f}s")
-                    _update_dance_status("choreography", 60, "Generating dance choreography...")
-                    result = raw
-                    break
-        else:
-            _time.sleep(1)
-            continue
-        break
+    # Poll for result (SSE streaming - reads line by line, breaks immediately on data)
+    deadline = time.time() + 180
+    result = None
+    try:
+        while time.time() < deadline and result is None:
+            try:
+                r = requests.get(
+                    f"https://{HF_SPACE.replace(chr(47), chr(45))}.hf.space/gradio_api/call/predict/{event_id}",
+                    headers={"Accept": "text/event-stream"},
+                    stream=True,
+                    timeout=180,
+                )
+                for line in r.iter_lines(decode_unicode=True):
+                    if line and line.startswith("data:"):
+                        raw = line[5:].strip()
+                        if raw and raw != "null":
+                            elapsed = time.time() - t0
+                            _log(f"HF response received in {elapsed:.1f}s")
+                            _update_dance_status("choreography", 60, "Generating dance choreography...")
+                            result = raw
+                            break
+                r.close()
+            except requests.exceptions.RequestException:
+                pass
+    except Exception as e:
+        _log(f"FATAL poll error: {type(e).__name__}: {e}")
+        raise
 
-    result = _parse_hf_result(result, full_duration)
+    result = _parse_hf_result(result or "{}", full_duration)
     result["duration"] = full_duration  # full song duration for choreography scheduling
     return result
 
@@ -399,6 +404,7 @@ def _choreography_loop(build_movement, run_movement,
 
     # Sort moves by start_time just in case
     sorted_moves = sorted(timed_choreography, key=lambda m: m[3])
+    max_moves = len(sorted_moves)
 
     # Head pose lookup for gap-filling (holds last pose instead of resetting)
     # Per-move execution: sleep_until each beat, execute one move, repeat.
@@ -752,7 +758,7 @@ def cmd_execute(state_path: str) -> dict:
     timed_choreo = [tuple(m) for m in state.get("timed_choreography", [])]
     genre = state.get("genre", "unknown")
     genre_display = state.get("genre_display", "Generic")
-    no_activate = state.get("no_activate", False)
+    no_activate = state.get("no_activate", True)
 
     # Initialize robot
     try:
@@ -883,11 +889,11 @@ def cmd_stop() -> dict:
     # (SIGKILL kills immediately — deactivation won't run in cmd_execute)
     try:
         _log("Deactivating robot...")
-        subprocess.run(
-            ["python3", "/home/ubuntu/minipupper-app/robot/robot_control.py", "deactivate"],
-            capture_output=True, timeout=5.0,
-        )
-        _log("Robot deactivated.")
+    #     subprocess.run(
+    #         ["python3", "/home/ubuntu/minipupper-app/robot/robot_control.py", "deactivate"],
+    #         capture_output=True, timeout=5.0,
+    #     )
+    #     _log("Robot deactivated.")
     except Exception as e:
         _log(f"Deactivation error: {e}")
 
