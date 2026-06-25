@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 # Archive files
 TASKS_FILE = os.path.expanduser("~/minipupper-app/tasks.json")
+TASKS_DIR = os.path.expanduser("~/minipupper-app/tasks")
 ARCHIVE_DIR = os.path.expanduser("~/minipupper-app/tasks_archive")
 ARCHIVE_INDEX = os.path.expanduser("~/minipupper-app/tasks_archive.json")
 
@@ -195,43 +196,44 @@ class TaskArchiver:
 
     def remove_task_from_active(self, task_id: str, tasks_file: str = TASKS_FILE) -> bool:
         """
-        Remove a task from the active tasks file.
-        Handles both wrapped format ({\"tasks\": {...}}) and flat format.
+        Remove a task by deleting its individual file from any status directory.
+        
+        First tries new file-per-task format (tasks/pending/active/completed/),
+        falls back to legacy tasks.json.
         
         Args:
             task_id: ID of task to remove
-            tasks_file: Path to tasks.json
+            tasks_file: Path to legacy tasks.json (fallback)
             
         Returns:
             True if successful, False otherwise
         """
         try:
             with self._lock:
-                if not os.path.exists(tasks_file):
-                    return False
-
-                with open(tasks_file) as f:
-                    data = json.load(f)
-
-                # Handle wrapped format: {"tasks": {...}}
-                if isinstance(data, dict) and "tasks" in data:
-                    tasks = data["tasks"]
-                    if task_id in tasks:
-                        del tasks[task_id]
-                        data["tasks"] = tasks
-                        with open(tasks_file, "w") as f:
-                            json.dump(data, f, indent=2)
-                        logger.info("TaskArchiver: removed task %s from active file (wrapped)",
-                                   task_id[:8])
+                # New format: delete individual file
+                for subdir in ("pending", "active", "completed", "archived"):
+                    fpath = os.path.join(TASKS_DIR, subdir, f"{task_id}.json")
+                    if os.path.exists(fpath):
+                        os.remove(fpath)
+                        logger.info("TaskArchiver: removed task %s from %s",
+                                   task_id[:8], subdir)
                         return True
-                # Handle flat format: {"task-id": {...}, ...}
-                else:
-                    if task_id in data:
-                        del data[task_id]
+
+                # Legacy fallback: remove from tasks.json
+                if os.path.exists(tasks_file):
+                    with open(tasks_file) as f:
+                        data = json.load(f)
+                    changed = False
+                    if isinstance(data, dict):
+                        if "tasks" in data and task_id in data["tasks"]:
+                            del data["tasks"][task_id]
+                            changed = True
+                        elif task_id in data:
+                            del data[task_id]
+                            changed = True
+                    if changed:
                         with open(tasks_file, "w") as f:
                             json.dump(data, f, indent=2)
-                        logger.info("TaskArchiver: removed task %s from active file (flat)",
-                                   task_id[:8])
                         return True
                 return False
 

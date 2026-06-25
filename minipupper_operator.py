@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 import time
 import re
+import subprocess
+import glob
 import argparse
 
 try:
@@ -286,38 +288,35 @@ class MinipupperOperator:
     def _archive_stale_tasks(self):
         """Clear ALL tasks from tasks.json on startup, archiving first."""
 
-        tasks_file = os.path.expanduser("~/minipupper-app/tasks.json")
-        if not os.path.exists(tasks_file):
-            return
-
-        try:
-            with open(tasks_file) as f:
-                data = json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return
-
-        tasks = data.get("tasks", {})
-        count = len(tasks)
-        if count == 0:
-            return
-
-        # Archive everything first (preserves history)
+        # New format: scan tasks/*/ for stale files and archive them
+        tasks_dir = os.path.expanduser("~/minipupper-app/tasks")
         archiver = TaskArchiver()
-        for task_id, task in list(tasks.items()):
-            archiver.archive_and_remove(task, tasks_file)
+        archived_count = 0
+        for subdir in ("pending", "active", "completed"):
+            d = os.path.join(tasks_dir, subdir)
+            if not os.path.isdir(d):
+                continue
+            for fname in sorted(os.listdir(d)):
+                if not fname.endswith(".json"):
+                    continue
+                fpath = os.path.join(d, fname)
+                try:
+                    with open(fpath) as f:
+                        task = json.load(f)
+                    archiver.archive_and_remove(task)
+                    archived_count += 1
+                except Exception:
+                    pass
+        if archived_count:
+            self.logger.info("Archived %d stale task(s) from tasks/ on startup", archived_count)
 
-        # Then wipe the file clean
-        try:
-            with open(tasks_file, "w") as f:
-                json.dump({"tasks": {}}, f)
-        except OSError as e:
-            self.logger.warning("Failed to clear tasks.json: %s", e)
-            return
-
-        self.logger.info(
-            "Cleared %d task(s) from tasks.json on startup.",
-            count
-        )
+        # Legacy fallback: clear old tasks.json
+        tasks_file = os.path.expanduser("~/minipupper-app/tasks.json")
+        if os.path.exists(tasks_file):
+            try:
+                os.remove(tasks_file)
+            except OSError:
+                pass
     
     def start(self):
         """Start the operator"""
@@ -357,7 +356,17 @@ class MinipupperOperator:
         if hasattr(self, 'task_watcher') and self.task_watcher:
             self.task_watcher.stop()
         
-        self.logger.info("Minipupper Operator stopped")
+        # Phase 2: Kill background audio/dance processes on shutdown
+        music_flag = '/tmp/minipupper_music_active'
+        dance_flag = '/tmp/minipupper_dance_active'
+        if os.path.exists(music_flag):
+            subprocess.run([sys.executable, 'custom/play_audio.py', 'stop'],
+                capture_output=True, timeout=5)
+        if os.path.exists(dance_flag):
+            subprocess.run([sys.executable, 'custom/hf_dance/hf_dance_to_audio.py', 'stop'],
+                capture_output=True, timeout=10)
+        
+        self.logger.info('Minipupper Operator stopped')
     
     def _start_workers(self):
         """Start background worker threads"""
@@ -406,6 +415,15 @@ class MinipupperOperator:
         )
         gw_thread.start()
         self._worker_threads.append(gw_thread)
+
+        # Pending Task Watcher - retrigger cron for stale pending tasks
+        ptw_thread = threading.Thread(
+            target=self._pending_task_watcher,
+            daemon=True,
+            name="PendingTaskWatcher"
+        )
+        ptw_thread.start()
+        self._worker_threads.append(ptw_thread)
     
     def _asr_worker(self):
         """Worker: Speech-to-text processing"""
@@ -431,6 +449,25 @@ class MinipupperOperator:
                             # mark internal interrupt flag for any other consumers
                             try:
                                 self._interrupt_requested.set()
+                            except Exception:
+                                pass
+                            # Also stop dance/music/cleanup like keyboard "stop" does
+                            try:
+                                import subprocess as _sp
+                                _sp.run([sys.executable, "custom/hf_dance/hf_dance_to_audio.py", "stop"],
+                                    capture_output=True, timeout=10)
+                            except Exception:
+                                pass
+                            try:
+                                _sp.run([sys.executable, "custom/play_audio.py", "stop"],
+                                    capture_output=True, timeout=5)
+                            except Exception:
+                                pass
+                            try:
+                                import glob as _gl, os as _os
+                                for _f in _gl.glob("tasks/pending/*.json") + _gl.glob("tasks/active/*.json"):
+                                    try: _os.remove(_f)
+                                    except: pass
                             except Exception:
                                 pass
                             # Do not enqueue interrupt phrases as user input
@@ -509,6 +546,98 @@ class MinipupperOperator:
                 self.logger.error(f"Keyboard Worker error: {e}")
                 time.sleep(0.5)
     
+    def _preprocess_command(self, text):
+        """Fast-path: Handle stop/cancel commands locally before Gemini sees them.
+
+        Returns None if fully handled (Gemini skipped), or remaining text to process.
+        """
+        if not text or not text.strip():
+            return None
+
+        text_lower = text.strip().lower()
+
+        # Keywords and targets
+        stop_words = ["stop", "cancel", "shut up", "shutup", "be quiet", "quiet", "enough", "kill"]
+        dance_words = ["dance", "dancing"]
+        music_words = ["music", "song", "audio", "playing"]
+        all_words = ["everything", "all"]
+
+        has_stop = any(kw in text_lower for kw in stop_words)
+        has_dance = any(w in text_lower for w in dance_words)
+        has_music = any(w in text_lower for w in music_words)
+        has_all = any(w in text_lower for w in all_words)
+
+        if not has_stop:
+            return text  # Not a stop command, pass through to Gemini
+
+        # Strip stop keywords to get remaining query
+        remaining = text_lower
+        for kw in stop_words:
+            remaining = remaining.replace(kw, "").replace(kw.capitalize(), "")
+        remaining = remaining.strip().strip(",.!? ").strip()
+        for p in ["and ", "then ", "also "]:
+            if remaining.startswith(p):
+                remaining = remaining[len(p):]
+        remaining = remaining.strip()
+
+        killed_anything = False
+        played_result = None
+
+        if has_all or (not has_dance and not has_music and not remaining):
+            # "stop everything" or bare "stop"
+            subprocess.run([sys.executable, "custom/hf_dance/hf_dance_to_audio.py", "stop"],
+                capture_output=True, timeout=10)
+            subprocess.run([sys.executable, "custom/play_audio.py", "stop"],
+                capture_output=True, timeout=5)
+            for f in glob.glob("tasks/pending/*.json") + glob.glob("tasks/active/*.json"):
+                try: os.remove(f)
+                except: pass
+            killed_anything = True
+            played_result = "All stopped!"
+            self.logger.info("Fast-path: Stopped everything locally")
+        else:
+            if has_dance:
+                subprocess.run([sys.executable, "custom/hf_dance/hf_dance_to_audio.py", "stop"],
+                    capture_output=True, timeout=10)
+                for f in glob.glob("tasks/pending/*.json") + glob.glob("tasks/active/*.json"):
+                    try:
+                        with open(f) as fh:
+                            data = json.load(fh)
+                        if data.get("action", "").startswith("robot.dance") or data.get("action", "").startswith("robot.stop"):
+                            os.remove(f)
+                    except:
+                        pass
+                killed_anything = True
+                played_result = "Stopped dancing!" if not has_music and not remaining else None
+                self.logger.info("Fast-path: Stopped dance locally")
+
+            if has_music:
+                subprocess.run([sys.executable, "custom/play_audio.py", "stop"],
+                    capture_output=True, timeout=5)
+                for f in glob.glob("tasks/pending/*.json") + glob.glob("tasks/active/*.json"):
+                    try:
+                        with open(f) as fh:
+                            data = json.load(fh)
+                        if data.get("action", "").startswith("robot.play") or data.get("action", "").startswith("robot.stop"):
+                            os.remove(f)
+                    except:
+                        pass
+                killed_anything = True
+                played_result = played_result or ("Music stopped." if not remaining else None)
+                self.logger.info("Fast-path: Stopped music locally")
+
+        if killed_anything and played_result:
+            output_text_queue.put(played_result)
+            try:
+                self.audio_manager.speak(played_result)
+            except Exception:
+                pass
+
+        if killed_anything and not remaining:
+            return None  # Fully handled, skip Gemini
+
+        # Return remaining query text (e.g., "stop dancing and play jazz" -> "play jazz")
+        return remaining if (killed_anything and remaining and remaining != text_lower) else text
     def _operator_worker(self):
         """Worker: Process input and generate responses"""
         self.logger.info("Operator Worker started")
@@ -521,6 +650,11 @@ class MinipupperOperator:
                 except Exception:
                     continue
 
+
+                # Phase 4: Local fast-path pre-processor for stop/cancel commands
+                text = self._preprocess_command(text)
+                if text is None:
+                    continue  # fully handled locally, skip Gemini
                 self.logger.info(f"Operator processing: {text}")
                 self.current_state = "processing"
 
@@ -544,7 +678,7 @@ class MinipupperOperator:
                     if hasattr(self, 'task_watcher') and self.task_watcher:
                         self.task_watcher.write_tasks(task_payloads)
                         self.logger.info("Phase 2: Wrote %d task(s) to tasks.json for agent", len(task_payloads))
-                        if self.gateway_client and self.gateway_client.is_connected:
+                        if self.gateway_client:
                             cron_id = getattr(self, "_cron_job_id", "")
                             if cron_id:
                                 self.gateway_client.trigger_cron(cron_id)
@@ -902,6 +1036,47 @@ class MinipupperOperator:
     
     
     
+    def _pending_task_watcher(self):
+        """Check tasks/pending/ every 5s for stale pending tasks (>30s old).
+        
+        If a pending task has been sitting untouched — likely a missed
+        cron.run trigger — retrigger the cron. Scans the per-file task
+        directory directly instead of relying on the legacy tasks.json rebuild.
+        """
+        cron_id = getattr(self, "_cron_job_id", "")
+        if not cron_id:
+            self.logger.warning("PendingTaskWatcher: No cron_job_id configured")
+            return
+
+        pending_dir = os.path.expanduser("~/minipupper-app/tasks/pending")
+
+        while self.is_running and not self._stop_event.is_set():
+            time.sleep(5)
+            try:
+                if not os.path.isdir(pending_dir):
+                    continue
+                for fname in sorted(os.listdir(pending_dir)):
+                    if not fname.endswith(".json"):
+                        continue
+                    fpath = os.path.join(pending_dir, fname)
+                    try:
+                        with open(fpath) as f:
+                            task = json.load(f)
+                    except (json.JSONDecodeError, OSError):
+                        continue
+                    if task.get("status") == "pending":
+                        age = time.time() - task.get("createdAt", 0)
+                        if age > 30 and self.gateway_client:
+                            # Mark stale in file to prevent re-trigger loops
+                            task["startedAt"] = time.time()
+                            with open(fpath, "w") as f:
+                                json.dump(task, f, indent=2)
+                            self.gateway_client.trigger_cron(cron_id)
+                            self.logger.info("PendingTaskWatcher: Retriggered cron for stale task %s (age=%ds)", fname, int(age))
+                            break
+            except Exception as e:
+                self.logger.warning("PendingTaskWatcher error: %s", e)
+
     def _set_mute_volume(self):
         """Sync mute state to AudioManager and set speaker to idle volume.
 
@@ -968,3 +1143,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    

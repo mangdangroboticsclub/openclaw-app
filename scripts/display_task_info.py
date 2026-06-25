@@ -43,6 +43,24 @@ def _get_font(size: int):
         return ImageFont.load_default()
 
 
+
+
+def draw_text_spaced(draw, xy, text, spacing=2, **kwargs):
+    """Draw text with custom character spacing to prevent LCD cutoff."""
+    fill = kwargs.pop('fill', None)
+    font = kwargs.get('font')
+    x, y = xy
+    for char in text:
+        draw.text((x, y), char, fill=fill, font=font)
+        bbox = draw.textbbox((0, 0), char, font=font)
+        x += bbox[2] - bbox[0] + spacing
+
+
+def _text_chars(text, font, draw):
+    """Quick helper to measure text."""
+    return draw.textbbox((0, 0), text, font=font)
+
+
 def make_display_image(
     action: str = "",
     status: str = "idle",
@@ -92,7 +110,7 @@ def make_display_image(
 
     font_large = _get_font(28)
     font_medium = _get_font(18)
-    font_small = _get_font(14)
+    font_small = _get_font(30)
 
     y = 10
 
@@ -126,21 +144,22 @@ def make_display_image(
                 draw.rectangle([bar_x, bar_y, bar_x + fill_w, bar_y + bar_h],
                                fill=fill_color)
 
-            draw.text((bar_x + bar_w + 8, bar_y - 2),
-                      f"{int(progress)}%", font=font_small, fill=TEXT_DIM)
+
             y = bar_y + bar_h + 8
         else:
             y += 40
 
         # Task message
         if message and len(message) > 3:
-            # Word-wrap message
+            # Word-wrap message using actual font measurement
             words = message.split()
             lines = []
             current_line = ""
+            max_width = 280  # safe margin within 320px
             for word in words:
                 test_line = f"{current_line} {word}".strip()
-                if len(test_line) * 9 > 290:  # Rough estimate
+                tw = draw.textbbox((0, 0), test_line, font=font_small)
+                if tw[2] - tw[0] > max_width:
                     lines.append(current_line)
                     current_line = word
                 else:
@@ -148,8 +167,8 @@ def make_display_image(
             lines.append(current_line)
 
             for line in lines[:3]:  # Max 3 lines
-                draw.text((12, y), line, font=font_small, fill=TEXT_DIM)
-                y += 20
+                draw_text_spaced(draw, (16, y), line, spacing=1, font=font_small, fill=TEXT_WHITE)
+                y += 30
     else:
         # Idle state - show pulsing "LISTENING..."
         draw.text((12, y), "MINIPUPPER", font=font_large, fill=status_color)
@@ -158,7 +177,7 @@ def make_display_image(
 
     # Clock/time at bottom
     if current_time:
-        draw.text((12, 220), current_time, font=font_small, fill=TEXT_DIM)
+        draw_text_spaced(draw, (12, 220), current_time, spacing=1, font=font_small, fill=TEXT_WHITE)
 
     return img
 

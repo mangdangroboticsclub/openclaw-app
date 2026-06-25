@@ -3,23 +3,37 @@
 import json
 import os
 
-TASKS_FILE = os.path.expanduser(
-    "~/.openclaw/workspace/minipupper/tasks.json"
-)
+TASKS_DIR = os.path.expanduser("~/minipupper-app/tasks")
 
-if not os.path.exists(TASKS_FILE):
-    print("No tasks file found. The gateway may need to process a task first.")
-    print(f"(expected at: {TASKS_FILE})")
+if not os.path.isdir(TASKS_DIR):
+    print("No tasks directory found.")
+    print(f"(expected at: {TASKS_DIR})")
     exit(1)
 
-with open(TASKS_FILE) as f:
-    tasks = json.load(f)
+# Scan all subdirectories
+all_tasks = {}
+for subdir in ("pending", "active", "completed"):
+    d = os.path.join(TASKS_DIR, subdir)
+    if not os.path.isdir(d):
+        continue
+    for fname in sorted(os.listdir(d)):
+        if not fname.endswith(".json"):
+            continue
+        fpath = os.path.join(d, fname)
+        try:
+            with open(fpath) as f:
+                task = json.load(f)
+            task["_dir"] = subdir
+            tid = task.get("taskId") or fname
+            all_tasks[tid] = task
+        except Exception:
+            pass
 
-if not tasks:
-    print("No tasks recorded.")
+if not all_tasks:
+    print("No tasks found.")
     exit(0)
 
-for task_id, task in tasks.items():
+for task_id, task in all_tasks.items():
     status = task.get("status", "unknown")
     action = task.get("action", "unknown")
     phase = task.get("phase", "")
@@ -27,16 +41,18 @@ for task_id, task in tasks.items():
     message = task.get("message", "")
     result = task.get("result", "")
     error = task.get("error", "")
+    task_dir = task.get("_dir", "?")
 
     icon = {"running": "🔄", "completed": "✅", "failed": "❌"}.get(status, "❓")
-    print(f"{icon} [{task_id[:8]}] {action}")
+    print(f"{icon} [{task_id[:8]}] {action} ({task_dir})")
     print(f"   Status: {status}")
     if phase:
         print(f"   Phase: {phase}")
     print(f"   Progress: {progress:.0f}%")
     print(f"   Message: {message}")
     if result:
-        print(f"   Result: {result[:200]}")
+        txt = str(result)
+        print(f"   Result: {txt[:200]}")
     if error:
         print(f"   Error: {error[:200]}")
     print()

@@ -26,6 +26,7 @@ from src.core.task_archiver import TaskArchiver
 logger = logging.getLogger(__name__)
 
 TASKS_FILE = os.path.expanduser("~/minipupper-app/tasks.json")
+TASKS_DIR = os.path.expanduser("~/minipupper-app/tasks")
 POLL_INTERVAL = 2.0  # Check file every 2 seconds
 
 
@@ -108,36 +109,95 @@ class TaskWatcher:
             self._thread.join(timeout=3.0)
 
     def _load_tasks(self) -> dict:
-        if not os.path.exists(TASKS_FILE):
-            return {}
-        try:
-            with open(TASKS_FILE) as f:
-                data = json.load(f)
-            # Handle wrapped format: {"tasks": {...}, "archived": [...]}
-            if isinstance(data, dict) and "tasks" in data:
-                return data["tasks"]
-            # Legacy flat format: {"task-id": {...}, ...}
-            if isinstance(data, dict):
-                # Normalize: LLM sometimes invents statuses like "pending_feedback"
-                # TaskWatcher only announces "completed" or "failed" tasks
-                for task in data.values():
-                    result = task.get("result")
-                    if isinstance(result, dict) and result.get("feedback_required"):
-                        task["status"] = "completed"
-                return data
-            return {}
-        except (json.JSONDecodeError, OSError) as e:
-            logger.warning("TaskWatcher: could not read tasks: %s", e)
-            return {}
+        """Scan tasks/ subdirectories for individual task files.
+        
+        Precedence: pending over active over completed.
+        Skips archived dir (only for archival storage).
+        Also falls back to legacy tasks.json if new format is empty.
+        """
+        tasks = {}
+        for subdir in ("pending", "active", "completed"):
+            d = os.path.join(TASKS_DIR, subdir)
+            if not os.path.isdir(d):
+                continue
+            try:
+                for fname in sorted(os.listdir(d)):
+                    if not fname.endswith(".json"):
+                        continue
+                    fpath = os.path.join(d, fname)
+                    try:
+                        with open(fpath) as f:
+                            task = json.load(f)
+                        tid = task.get("taskId")
+                        if tid:
+                            # Completed + announced is still interesting (for cleanup)
+                            tasks[tid] = task
+                    except (json.JSONDecodeError, OSError):
+                        pass
+            except OSError:
+                pass
+
+        # Normalize: LLM sometimes invents statuses like "pending_feedback"
+        for task in tasks.values():
+            result = task.get("result")
+            if isinstance(result, dict) and result.get("feedback_required"):
+                task["status"] = "completed"
+
+        # Fallback to legacy tasks.json if no individual files found
+        if not tasks and os.path.exists(TASKS_FILE):
+            try:
+                with open(TASKS_FILE) as f:
+                    data = json.load(f)
+                if isinstance(data, dict) and "tasks" in data:
+                    return data["tasks"]
+                if isinstance(data, dict):
+                    for task in data.values():
+                        result = task.get("result")
+                        if isinstance(result, dict) and result.get("feedback_required"):
+                            task["status"] = "completed"
+                    return data
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        return tasks
 
     def _save_tasks(self, tasks: dict):
-        os.makedirs(os.path.dirname(TASKS_FILE), exist_ok=True)
-        # Always write in wrapped format: {"tasks": {...}}
-        # This keeps the file format consistent regardless of who writes it
-        # (the gateway agent may also add "archived": [...] to the same file)
-        wrapped = {"tasks": tasks}
-        with open(TASKS_FILE, "w") as f:
-            json.dump(wrapped, f, indent=2)
+        """Write individual task files into tasks/*/ subdirectories.
+        
+        Each task is written to the file corresponding to its status:
+          pending → tasks/pending/{taskId}.json
+          active/running/processing → tasks/active/{taskId}.json
+          completed/failed → tasks/completed/{taskId}.json
+          
+        Tasks with unknown status are skipped.
+        Tasks in the dict that already have correct files are updated in place.
+        """
+        dirs = {
+            "pending": os.path.join(TASKS_DIR, "pending"),
+            "active": os.path.join(TASKS_DIR, "active"),
+            "running": os.path.join(TASKS_DIR, "active"),
+            "processing": os.path.join(TASKS_DIR, "active"),
+            "completed": os.path.join(TASKS_DIR, "completed"),
+            "failed": os.path.join(TASKS_DIR, "completed"),
+        }
+        for tid, task in tasks.items():
+            status = task.get("status", "")
+            d = dirs.get(status)
+            if not d:
+                continue
+            # Remove stale file from any other status dir
+            for other_dir in set(dirs.values()):
+                other_path = os.path.join(other_dir, f"{tid}.json")
+                if other_path != os.path.join(d, f"{tid}.json"):
+                    try:
+                        os.remove(other_path)
+                    except OSError:
+                        pass
+            # Write to correct dir
+            path = os.path.join(d, f"{tid}.json")
+            os.makedirs(d, exist_ok=True)
+            with open(path, "w") as f:
+                json.dump(task, f, indent=2)
 
     def write_task(self, task_data: dict):
         """Write a new pending task to the file."""
@@ -145,16 +205,15 @@ class TaskWatcher:
         return task_ids[0] if task_ids else None
 
     def write_tasks(self, task_items: List[dict]) -> List[str]:
-        """Write one or more new pending tasks to the file."""
+        """Write one or more new pending tasks as individual files."""
         if not task_items:
             return []
 
         task_ids: List[str] = []
         with self._lock:
-            tasks = self._load_tasks()
             for task_data in task_items:
                 task_id = task_data.get("taskId") or f"task-{uuid.uuid4().hex[:12]}"
-                tasks[task_id] = {
+                task = {
                     "taskId": task_id,
                     "action": task_data.get("action", ""),
                     "params": task_data.get("params", {}),
@@ -169,8 +228,11 @@ class TaskWatcher:
                     "createdAt": time.time(),
                     "updatedAt": time.time(),
                 }
+                path = os.path.join(TASKS_DIR, "pending", f"{task_id}.json")
+                os.makedirs(os.path.join(TASKS_DIR, "pending"), exist_ok=True)
+                with open(path, "w") as f:
+                    json.dump(task, f, indent=2)
                 task_ids.append(task_id)
-            self._save_tasks(tasks)
 
         if len(task_ids) == 1:
             logger.info("TaskWatcher: wrote pending task %s (%s)",
@@ -346,6 +408,34 @@ class TaskWatcher:
             tasks[task_id]["updatedAt"] = time.time()
             self._save_tasks(tasks)
             logger.info("TaskWatcher: marked task %s as announced", task_id[:8])
+        # Sync: remove this task from legacy tasks.json to prevent
+        # fallback re-announce loops when per-file is later archived.
+        self._sync_remove_from_legacy(task_id)
+
+    def _sync_remove_from_legacy(self, task_id: str):
+        """Remove a task from the legacy tasks.json after per-file processing."""
+        import os as _os
+        legacy = _os.path.expanduser("~/minipupper-app/tasks.json")
+        if not _os.path.exists(legacy):
+            return
+        try:
+            with open(legacy) as f:
+                data = json.load(f)
+            changed = False
+            if isinstance(data, dict):
+                if "tasks" in data and task_id in data["tasks"]:
+                    del data["tasks"][task_id]
+                    changed = True
+                elif task_id in data:
+                    del data[task_id]
+                    changed = True
+            if changed:
+                data["updatedAt"] = time.time()
+                with open(legacy, 'w') as f:
+                    json.dump(data, f, indent=2)
+                logger.info("TaskWatcher: cleaned task %s from legacy tasks.json", task_id[:8])
+        except (json.JSONDecodeError, OSError):
+            pass
 
     def _update_display(self, tasks: dict):
         """Update the LCD display with the most interesting task state."""
@@ -378,6 +468,16 @@ class TaskWatcher:
         except Exception:
             pass  # Don't crash if display fails
 
+    def _rebuild_index(self):
+        """Rebuild tasks.json as a read-only snapshot from individual files."""
+        try:
+            all_tasks = self._load_tasks()
+            index_path = os.path.expanduser("~/minipupper-app/tasks.json")
+            with open(index_path, "w") as f:
+                json.dump({"tasks": all_tasks, "updatedAt": time.time()}, f, indent=2)
+        except Exception:
+            pass  # Best-effort, never critical
+
     def _run(self):
         # Track last announced progress per task
         _last_announced: dict = {}
@@ -386,6 +486,8 @@ class TaskWatcher:
                 tasks = self._load_tasks()
                 # Update LCD display with current task state
                 self._update_display(tasks)
+                # Snapshot tasks.json BEFORE processing completed tasks (archiving deletes files)
+                self._rebuild_index()
                 for task_id, task in tasks.items():
                     status = task.get("status", "")
                     prev = _last_announced.get(task_id, {})

@@ -27,6 +27,7 @@ Usage:
   python3 robot/robot_control.py greet               # wave a leg
 """
 
+import os
 import sys
 import time
 import argparse
@@ -36,7 +37,7 @@ import numpy as np
 sys.path.insert(0, "/home/ubuntu/StanfordQuadruped")
 
 from src.MovementGroup import MovementGroups
-from src.MovementScheme import MovementScheme
+from src.MovementScheme import MovementScheme, LocationStanding, SpeedStanding, AttitudeStanding
 from src.Controller import Controller
 from src.State import State
 from src.Command import Command
@@ -82,7 +83,7 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
         move.gait_uni(v_x=SPEED, v_y=0, time_uni=duration, time_acc=ACCEL)
 
     elif command in ("backward", "b"):
-        move.gait_uni(v_x=-SPEED, v_y=0, time_uni=duration, time_acc=ACCEL)
+        move.gait_uni(v_x=-SPEED, v_y=0, time_uni=1, time_acc=ACCEL)
 
     elif command in ("right", "r"):
         move.gait_uni(v_x=0, v_y=-SPEED, time_uni=duration, time_acc=ACCEL)
@@ -113,6 +114,44 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
 
     elif command in ("look-upper-left", "look_upperleft", "upper-left", "upperleft"):
         move.head_move(pitch_deg=15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)
+
+    elif command in ("look-lower-left", "look_lowerleft", "lower-left", "lowerleft"):
+        move.head_move(pitch_deg=-15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)
+
+    elif command in ("look-lower-right", "look_lowerright", "lower-right", "lowerright"):
+        move.head_move(pitch_deg=-15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+
+        
+        
+    elif command in ("disco1"):
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        # reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (1 * _n_subs) if (1 * _n_subs) > 0 else 0.05
+        for _ in range(1):
+            move.head_move(pitch_deg=15, yaw_deg=20, time_uni=sub_hold, time_acc=_sub_tic)
+            move.head_move(pitch_deg=15, yaw_deg=-20, time_uni=sub_hold, time_acc=_sub_tic)
+            # move.head_move(pitch_deg=-15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+            # move.head_move(pitch_deg=-15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)
+        
+    elif command in ("disco2"):
+        move.head_move(pitch_deg=15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+        move.head_move(pitch_deg=-15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)        
+        # move.head_move(pitch_deg=-15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+        # move.head_move(pitch_deg=15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)
+
+    elif command in ("disco3"):
+        move.head_move(pitch_deg=15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+        move.head_move(pitch_deg=-15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+        # move.head_move(pitch_deg=15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)
+        # move.head_move(pitch_deg=-15, yaw_deg=-20, time_uni=duration, time_acc=time_acc)     
+
+    elif command in ("seek"):
+        move.head_move(pitch_deg=-8, yaw_deg=30, time_uni=duration, time_acc=time_acc)
+        # move.stop(time=0.1)
+        move.head_move(pitch_deg=8, yaw_deg=-30, time_uni=duration, time_acc=time_acc)
+        
+     
         
 
     elif command in ("look-upper-right", "look_upperright", "upper-right", "upperright"):
@@ -120,28 +159,30 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
         
 
     elif command in ("raise-body", "raise_body", "raise"):
-        move.height_move(ht=0.03, time_uni=max(duration, 0.5), time_acc=0.5)
+        move.height_move(ht=0.03, time_uni=duration, time_acc=time_acc)
 
     elif command in ("lower-body", "lower_body", "lower"):
-        move.height_move(ht=-0.03, time_uni=max(duration, 0.5), time_acc=0.5)
+        move.height_move(ht=-0.03, time_uni=duration, time_acc=time_acc)
 
     elif command == "squat":
-        move.height_move(ht=-0.04, time_uni=max(duration, 0.5), time_acc=0.5)
-        move.stop(time=1.5)
+        move.height_move(ht=-0.04, time_uni=duration, time_acc=time_acc)
+        move.stop(time=0.1)
+        move.height_move(ht=-0.04, time_uni=duration, time_acc=time_acc)
+        move.stop(time=0.1)
 
     elif command in ("body-row", "body_row", "roll"):
-        move.body_row(row_deg=angle if angle else 10, time_uni=duration if duration else 1.0, time_acc=time_acc)
+        move.body_row(row_deg=angle if angle else 20, time_uni=duration, time_acc=time_acc)
 
     # ── Standing / Activation ──
     elif command in ("stop", "idle"):
         move.stop(time=max(duration, 1.0))
 
     elif command in ("activate", "init", "stand"):
-        move.height_move(ht=0.03, time_uni=0.5, time_acc=0.5)
+        move.height_move(ht=0.03, time_uni=duration, time_acc=time_acc)
         move.stop(time=0.3)
 
     elif command in ("deactivate", "sit", "rest"):
-        move.height_move(ht=-0.04, time_uni=0.5, time_acc=0.5)
+        move.height_move(ht=-0.04, time_uni=duration, time_acc=time_acc)
         move.stop(time=0.3)
 
     # ── Sequences ──
@@ -197,18 +238,307 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
               
         
     elif command == "backleg_lift":
-        move.backleg_lift("right", ht=0.01, time_uni=1.5, time_acc=0.15)
-        move.stop(time=0.1)    
+        # _n_subs = 2
+        # _sub_tic = max(time_acc / _n_subs, 0.015)
+        # reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        # _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05 
+        # for _ in range(reps):
+        move.backleg_lift("right", ht=0.01, time_uni=duration, time_acc=time_acc)
+        # move.stop(time=0.1)   
+        move.backleg_lift("left", ht=0.01, time_uni=duration, time_acc=time_acc) 
+        # move.stop(time=0.1) 
         
     elif command == "greet":
-        move.foreleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
+        move.foreleg_lift("right", ht=0.005, time_uni=duration, time_acc=time_acc)
         move.stop(time=0.1)
-        move.foreleg_lift("left", ht=0.05, time_uni=1.0, time_acc=0.5)
+        move.foreleg_lift("left", ht=0.005, time_uni=duration, time_acc=time_acc)
         move.stop(time=0.1)
-        # move.backleg_lift("right", ht=0.04, time_uni=1.0, time_acc=0.5)
-        # move.stop(time=0.5)
-        # # move.backleg_lift("left", ht=0.04, time_uni=1.0, time_acc=0.5)
-        # move.stop(time=0.5)
+
+    
+
+    # ── Dance Moves (10 choreographed sequences) ────────────────────
+
+    elif command == "headbang":
+        """Rapid body pitch oscillation — looks like human headbanging."""
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05
+        for _ in range(reps):
+            move.head_move(pitch_deg=15, yaw_deg=0, time_uni=_sub_hold, time_acc=_sub_tic)
+            move.head_move(pitch_deg=-15, yaw_deg=0, time_uni=_sub_hold, time_acc=_sub_tic)
+
+    elif command == "bounce":
+        """Body bob — raise on upbeats, lower on downbeats."""
+        # _n_subs = 2
+        # _sub_tic = max(time_acc / _n_subs, 0.015)
+        # reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        # _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05
+        # for _ in range(reps):
+        move.height_move(ht=0.02, time_uni=duration, time_acc=time_acc)
+        move.height_move(ht=-0.01, time_uni=duration, time_acc=time_acc)
+        
+
+    elif command in ("swagger", "body-roll"):
+        """Groovy body roll — side-to-side tilt."""
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        # reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (1 * _n_subs) if (1 * _n_subs) > 0 else 0.05
+        for _ in range(1):
+            move.body_row(row_deg=15, time_uni=_sub_hold, time_acc=_sub_tic)
+            move.body_row(row_deg=-15, time_uni=_sub_hold, time_acc=_sub_tic)
+
+    elif command == "spin": 
+        """Dramatic rotation — 180 deg spin then 90 deg back."""
+        spin_angle = angle if angle else 180
+        move.rotate(angle=spin_angle)
+        move.stop(time=0.3)
+        move.rotate(angle=-(spin_angle // 2))
+        move.stop(time=0.2)
+
+    elif command == "wave":
+        """Alternating all-4-legs wave — front legs then back legs."""
+        reps = max(1, int(duration / 3.0)) if duration > 0 else 1
+        for _ in range(reps):
+            # Right front
+            move.foreleg_lift(leg_index="right", ht=0.005, time_uni=time_acc, time_acc=time_acc)
+            move.stop(time=0.15)            
+            # Left front
+            move.foreleg_lift(leg_index="left", ht=0.005, time_uni=time_acc, time_acc=time_acc)
+            move.stop(time=0.15)
+            # Right back (diagonal)
+            move.backleg_lift(leg_index="right", ht=0.005, time_uni=time_acc, time_acc=time_acc)
+            move.stop(time=0.15)
+            # Left back (diagonal)
+            move.backleg_lift(leg_index="left", ht=0.005, time_uni=time_acc, time_acc=time_acc)
+            move.stop(time=0.15)
+            
+
+    elif command == "shuffle":
+        """Side-step left/right — classic disco / pop shuffle."""
+        reps = max(1, int(duration / 1.2)) if duration > 0 else 2
+        for _ in range(reps):
+            move.gait_uni(v_x=0, v_y=0.2, time_uni=0.4, time_acc=0.2)
+            move.stop(time=0.15)
+            move.gait_uni(v_x=0, v_y=-0.2, time_uni=0.4, time_acc=0.2)
+            move.stop(time=0.15)
+
+    elif command == "dip":
+        """Slow dramatic lean — look down + tilt + lower body."""
+        move.height_move(ht=-0.02, time_uni=duration, time_acc=time_acc)
+        move.head_move(pitch_deg=-25, yaw_deg=0, time_uni=duration, time_acc=time_acc)
+        move.body_row(row_deg=-15, time_uni=duration, time_acc=time_acc)
+        move.stop(time=0.5)
+        # Return to upright
+        move.head_move(pitch_deg=25, yaw_deg=0, time_uni=duration, time_acc=time_acc)
+        move.body_row(row_deg=0, time_uni=duration, time_acc=time_acc)
+        move.height_move(ht=0.02, time_uni=duration, time_acc=time_acc)
+        move.stop(time=0.2)
+
+    elif command == "nod":
+        """Subtle head nod — small 5 deg pitch oscillation."""
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05
+        for _ in range(reps):
+            move.head_move(pitch_deg=5, yaw_deg=0, time_uni=_sub_hold, time_acc=_sub_tic)
+            move.head_move(pitch_deg=-5, yaw_deg=0, time_uni=_sub_hold, time_acc=_sub_tic)
+            
+
+    # elif command == "lean":
+    #     """Slow controlled body tilt in one direction, then return."""
+    #     lean_angle = angle if angle else 25
+    #     stages = max(3, int(abs(lean_angle) / 5))
+    #     step = lean_angle / stages
+    #     for s in range(stages, 0, -1):
+    #         move.body_row(row_deg=s * step, time_uni=time_acc, time_acc=0.1)
+    #     move.stop(time=0.1)
+    #     for s in range(1, stages + 1):
+    #         move.body_row(row_deg=-s * step, time_uni=time_acc, time_acc=0.1)
+
+    elif command == "lean":
+        """Slow controlled body tilt in one direction, then return."""
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = max(duration / (reps * _n_subs), 0.025) if (reps * _n_subs) > 0 else 0.05
+        for _ in range(reps):            
+            move.body_row(row_deg=20, time_uni=duration, time_acc=time_acc)        
+            move.body_row(row_deg=10, time_uni=duration, time_acc=time_acc)        
+            move.body_row(row_deg=-10, time_uni=duration, time_acc=time_acc)
+            move.body_row(row_deg=-20, time_uni=duration, time_acc=time_acc)
+
+    elif command == "flourish":
+        """Multi-axis showstopper: look up + rise + spin + sink + tilt + finish."""
+        move.head_move(pitch_deg=20, yaw_deg=0, time_uni=0.4, time_acc=0.2)
+        move.height_move(ht=0.03, time_uni=0.3, time_acc=0.15)
+        move.rotate(angle=180)
+        move.head_move(pitch_deg=-15, yaw_deg=0, time_uni=0.4, time_acc=0.2)
+        move.height_move(ht=-0.03, time_uni=0.3, time_acc=0.15)
+        move.body_row(row_deg=15, time_uni=0.4, time_acc=0.2)
+        move.body_row(row_deg=0, time_uni=0.3, time_acc=0.15)
+        move.rotate(angle=-30)
+        move.stop(time=0.3)
+
+
+    # elif command in ("front-kick", "front_kick"):
+    #     """Both front legs kick up — snap up, hold, return."""
+    #     # Phase 1: Lower body slightly, lift right front leg
+    #     move.height_move(ht=-0.01, time_uni=0.3, time_acc=0.2)
+    #     move.foreleg_lift(leg_index="right", ht=0.06, time_uni=0.4, time_acc=0.15)
+    #     move.stop(time=0.1)
+    #     # Phase 2: Snap left front leg up too
+    #     move.foreleg_lift(leg_index="left", ht=0.06, time_uni=0.4, time_acc=0.15)
+    #     move.stop(time=0.3)
+    #     # Phase 3: Return to standing
+    #     move.height_move(ht=0.01, time_uni=0.3, time_acc=0.2)
+    #     move.stop(time=0.2)
+
+    elif command in ("front_kick", "rear_up"):
+        # Phase 1: Snap front legs up with max height + pitch back
+        move.front_kick(ht=0.06, pitch_deg=25, time_uni=duration, time_acc=time_acc)
+        # Phase 2: Return to default standing
+        move.front_kick_to_stand(time_uni=duration, time_acc=time_acc)
+        # Phase 3: Settle
+        move.stop(time=0.1)
+
+    # ── Genre Signatures ────────────────────────────────────────
+    elif command == "head_ellipse":
+        """🤘 Head Oscillation — head traces a fast ellipse (head_ellipse)."""
+        move.head_ellipse(interp_num = time_acc*16)
+        
+        # move.stop(time=0.1)
+
+    elif command == "body_ellipse":
+        """🎤 Swim — all 4 legs trace circles, body swims in place (body_cycle)."""
+        move.body_ellipse(interp_num = time_acc*16)
+        # move.stop(time=0.1)
+
+    elif command == "head_cycle":
+        """🤘 Quick head oscillation — 8-point ellipse in ~0.6s."""
+        from src.MovementScheme import Movements as _Mv
+        _h = _Mv('head_cycle')
+        _h.setTransitionTic(3)
+        _h.setInterpolationNumber(5)
+        _h.setLegsSequence(move.default_stand)
+        _h.setAttitudeSequence([
+            [0, 0,    15], [0, 10,  10], [0, 15,  0],
+            [0, 10,  -10], [0, 0,  -15], [0, -10,-10],
+            [0, -15,  0],  [0, -10, 10],
+        ], "single", 1)
+        _h.setSpeedSequence([[0,0,0]], "single", 1)
+        _h.setTurnSequence([[0,0,0]])
+        move.MovementLib.append(_h)
+    
+    elif command == "swim":
+        """🎤 Quick body cycle — 8-point leg circle in ~0.6s."""
+        from src.MovementScheme import Movements as _Mv
+        import numpy as np
+        _r = 0.04
+        _legs = []
+        for _lx, _ly in [(0.06,-0.05),(0.06,0.05),(-0.06,-0.05),(-0.06,0.05)]:
+            _legs.append([[ _lx+np.cos(a*0.785)*_r, _ly+np.sin(a*0.785)*_r, -0.07] for a in range(1, 9)])
+        _s = _Mv('swim')
+        _s.setTransitionTic(3)
+        _s.setInterpolationNumber(5)
+        _s.setLegsSequence(_legs, "single", 1)
+        _s.setSpeedSequence([[0,0,0]]*8, "single", 1)
+        _s.setAttitudeSequence([[0,0,0]]*8, "single", 1)
+        _s.setTurnSequence([[0,0,0]])
+        move.MovementLib.append(_s)
+
+    elif command == "step_move":
+        move.step_move (ht=-0.025, time_uni=duration/2, time_acc=0.015)
+        # move.stop (time=0.1)
+
+    elif command == "twerk":
+        """🍑 Twerk — single-pose hold + stop for smooth return."""
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05 
+        for _ in range(1):
+            move.twerk(ht=0.02, time_uni=_sub_hold, time_acc=_sub_tic)                   
+            move.twerk(ht=-0.02, time_uni=_sub_hold, time_acc=_sub_tic)
+            
+          
+
+    elif command == "wiggle":
+        """🍑 Multi-pose wiggle — same beat control as butt_shrug.
+        interp_num auto-derived from time_uni inside wiggle_left/right."""
+        move.wiggle_left(time_uni=duration, time_acc=time_acc)
+        move.wiggle_right(time_uni=duration, time_acc=time_acc)
+
+    elif command == "left_wiggle":
+        """🍑 Multi-pose wiggle — same beat control as butt_shrug.
+        interp_num auto-derived from time_uni inside wiggle_left/right."""
+        move.wiggle_left(time_uni=duration, time_acc=time_acc)
+        # move.wiggle_right(time_uni=duration, time_acc=time_acc)
+
+    elif command == "right_wiggle":
+        """🍑 Multi-pose wiggle — same beat control as butt_shrug.
+        interp_num auto-derived from time_uni inside wiggle_left/right."""
+        # move.wiggle_left(time_uni=duration, time_acc=time_acc)
+        move.wiggle_right(time_uni=duration, time_acc=time_acc)
+        
+    
+    elif command == "shoulder_shrug":
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05
+        for _ in range(1):
+            # move.head_move(pitch_deg=-25, yaw_deg=0, time_uni=duration, time_acc=time_acc)
+            move.head_move(pitch_deg=0, yaw_deg=15, time_uni=duration, time_acc=time_acc)
+            # move.stop (time=0.1)
+            move.head_move(pitch_deg=0, yaw_deg=-15, time_uni=duration, time_acc=time_acc)
+            # move.stop (time=0.1)
+            # move.head_move(pitch_deg=0, yaw_deg=-15, time_uni=duration, time_acc=time_acc)
+            # move.stop (time=0.1)
+
+    elif command == "left_shoulder_shrug":
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05
+        for _ in range(1):            
+            move.head_move(pitch_deg=0, yaw_deg=15, time_uni=duration, time_acc=time_acc)
+            
+
+    elif command == "right_shoulder_shrug":
+        _n_subs = 2
+        _sub_tic = max(time_acc / _n_subs, 0.015)
+        reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05
+        for _ in range(1):            
+            move.head_move(pitch_deg=0, yaw_deg=-15, time_uni=duration, time_acc=time_acc)
+        
+
+    
+
+    elif command == "butt_shrug": 
+        # _n_subs = 2
+        # _sub_tic = max(time_acc / _n_subs, 0.015)
+        # reps = max(1, int((time_acc + duration) / (time_acc * _n_subs))) if duration > 0 else 1
+        # _sub_hold = duration / (reps * _n_subs) if (reps * _n_subs) > 0 else 0.05 
+        # for _ in range(reps):
+        move.butt_shrug_left(time_uni=duration, time_acc=time_acc)
+        move.butt_shrug_right(time_uni=duration, time_acc=time_acc)
+        # move.butt_shrug_left(time_uni=duration, time_acc=time_acc)
+        # move.stop_butt_shrug (time=0.1)
+        # move.butt_shrug_right(time_uni=duration, time_acc=time_acc)
+        # move.stop_butt_shrug (time=0.1)
+        # move.butt_shrug_trajectory(time_uni=duration, time_acc=time_acc)
+    
+    elif command == "left_butt_shrug":
+        move.butt_shrug_left(time_uni=duration, time_acc=time_acc)
+    
+    elif command == "right_butt_shrug":
+        move.butt_shrug_right(time_uni=duration, time_acc=time_acc)
+
+        
 
     else:
         raise ValueError(f"Unknown command: {command}")
@@ -220,7 +550,9 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
 #  Execution Engine
 # ═══════════════════════════════════════════════════════════════════
 
-def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
+def run_movement(movement_lib, timeout=30.0, initial_state=None,
+             stop_flag_path=None, progress_callback=None,
+             tilt_state=None):
     """
     Execute a MovementLib directly on the robot hardware.
 
@@ -230,11 +562,38 @@ def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
     Args:
         movement_lib: List of Movements (from MovementGroups)
         timeout: Maximum wall-clock execution time (seconds)
+        initial_state: Optional dict with 'legs_location', 'speed',
+                       'attitude', 'turn' from the previous movement.
+                       Keeps transitions smooth instead of snapping
+                       back to standing between moves.
 
     Returns:
-        True on success, False on timeout/error
+        (True, state_dict) on success, (False, state_dict) on timeout/error/stop
+        state_dict has keys: legs_location, speed, attitude, turn
     """
-    movement_ctl = MovementScheme(movement_lib, initial_attitude)
+    movement_ctl = MovementScheme(movement_lib)
+
+    # Override initial state for smooth transition from previous pose
+    if initial_state:
+        movement_ctl.legs_location_pre = np.array(initial_state.get('legs_location', LocationStanding))
+        movement_ctl.legs_location_now = np.array(initial_state.get('legs_location', LocationStanding))
+        movement_ctl.speed_pre = np.array(initial_state.get('speed', [0,0,0]))
+        movement_ctl.speed_now = np.array(initial_state.get('speed', [0,0,0]))
+        movement_ctl.attitude_pre = np.array(initial_state.get('attitude', [0,0,0]))
+        movement_ctl.attitude_now = np.array(initial_state.get('attitude', [0,0,0]))
+        movement_ctl.turn_pre = np.array(initial_state.get('turn', [0,0,0]))
+        movement_ctl.turn_now = np.array(initial_state.get('turn', [0,0,0]))
+        # Skip the initial Exit phase — go straight to Entry
+        movement_ctl.ststus = 'Entry'
+        movement_ctl.entry_down = False
+        movement_ctl.entry_down1 = False
+        movement_ctl.entry_down2 = False
+        movement_ctl.entry_down3 = False
+        movement_ctl.getAccCommand = True
+        # Prevent the state machine from redirecting to Exit-standing
+        # on first tick by matching movement_now_name to the first input
+        movement_ctl.movement_now_name = ' '
+
     lib_length = len(movement_lib)
 
     command = Command()
@@ -243,10 +602,12 @@ def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
     last_loop = time.time()
     start_time = time.time()
 
-    # Estimate duration from movement params + 3s safety margin
-    est_duration = max(15.0, lib_length * 0.5 + 5.0)
-
-    hard_timeout = min(timeout, max(est_duration, 8.0))
+    # Estimate duration — use timeout as floor, lib estimate as ceiling
+    est_duration = max(timeout, lib_length * 0.2 + 3.0)
+    hard_timeout = est_duration + 5.0
+    last_flag_check = 0
+    last_progress_call = 0
+    stopped_by_flag = False
 
     while True:
         now = time.time()
@@ -259,7 +620,12 @@ def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
         # Safety timeout
         if elapsed > hard_timeout:
             print(f"ERROR: Execution timed out after {elapsed:.1f}s", file=sys.stderr)
-            return False, list(movement_ctl.attitude_now)
+            return False, {
+        'legs_location': list(list(x) for x in movement_ctl.legs_location_now),
+        'speed': list(movement_ctl.speed_now),
+        'attitude': list(movement_ctl.attitude_now),
+        'turn': list(movement_ctl.turn_now),
+    }
 
         # Orientation (no IMU for CLI commands)
         _state.quat_orientation = np.array([1, 0, 0, 0])
@@ -271,6 +637,8 @@ def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
         command.legslocation = movement_ctl.getMovemenLegsLocation()
         command.horizontal_velocity = movement_ctl.getMovemenSpeed()
         command.roll = movement_ctl.attitude_now[0]
+        if tilt_state is not None:
+            tilt_state.roll_deg = float(movement_ctl.attitude_now[0])
         command.pitch = movement_ctl.attitude_now[1]
         command.yaw = movement_ctl.attitude_now[2]
         command.yaw_rate = movement_ctl.getMovemenTurn()
@@ -281,6 +649,19 @@ def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
         # Send joint angles to servos via ESP32
         _hardware.set_actuator_postions(_state.joint_angles)
 
+        # Check stop flag periodically (every ~1.5s elapsed)
+        if stop_flag_path and elapsed - last_flag_check >= 1.5:
+            last_flag_check = elapsed
+            if not os.path.exists(stop_flag_path):
+                print("Dance stopped via flag", file=sys.stderr)
+                stopped_by_flag = True
+                break
+
+        # Call progress callback periodically (every ~3s elapsed)
+        if progress_callback and elapsed - last_progress_call >= 3.0:
+            last_progress_call = elapsed
+            progress_callback(movement_ctl.movement_now_number, lib_length, elapsed)
+
         # Check if all movements played (tick logic) OR time-based fallback
         scheme_done = (movement_ctl.movement_now_number >= lib_length - 1
                        and movement_ctl.tick >= movement_ctl.now_ticks)
@@ -289,7 +670,13 @@ def run_movement(movement_lib, timeout=30.0, initial_attitude=None):
         if scheme_done or time_done:
             break
 
-    return True, list(movement_ctl.attitude_now)
+    ok = not stopped_by_flag
+    return ok, {
+        'legs_location': list(list(x) for x in movement_ctl.legs_location_now),
+        'speed': list(movement_ctl.speed_now),
+        'attitude': list(movement_ctl.attitude_now),
+        'turn': list(movement_ctl.turn_now),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -328,6 +715,7 @@ def main():
         print("  raise-body, lower-body                   # Height (arg: duration)")
         print("  body-row, roll                           # Body roll (arg: degrees)")
         print("  activate, deactivate, stop               # Standing")
+        print("  front-kick, rear-up                      # Both front legs up")
         print("  dance, greet                             # Sequences")
         return 0
 
