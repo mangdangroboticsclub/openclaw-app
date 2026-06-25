@@ -46,11 +46,11 @@ GENRE_POOLS = {
         # Vibe: graceful bowing, elegant swagger, ballet-like leg lifts
         # Signature: greet (bow), swagger (graceful sway)
         "moves": [
-            "greet", "squat", "body_ellipse", "lean"
+            "greet", "squat", "body_ellipse",
             
         ],
         "weights": [
-            0.2, 0.3, 0.2, 0.3            
+            0.4, 0.35, 0.25,           
         ],
     },
     "pop": {

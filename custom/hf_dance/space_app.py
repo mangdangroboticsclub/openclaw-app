@@ -19,6 +19,7 @@ import numpy as np
 import librosa
 
 
+
 def analyze_audio(audio, duration_sec: float = 180.0):
     """Analyze audio for BPM + beat timing + energy-based time_acc.
 
