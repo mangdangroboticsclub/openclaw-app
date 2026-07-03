@@ -196,7 +196,7 @@ def _set_music_active(active: bool):
 def _set_volume(pct: str = "90%"):
     """Set speaker volume via shared audio_util (auto-detects card)."""
     try:
-        sys.path.insert(0, "/home/ubuntu/minipupper-app")
+        sys.path.insert(0, "/home/ubuntu/openclaw-app")
         from src.audio.audio_util import set_volume as _av
         _av(pct)
     except Exception:
@@ -208,7 +208,7 @@ def _set_volume(pct: str = "90%"):
 def _update_dance_status(phase: str, progress: float, message: str):
     """Update the dance task's individual file in tasks/active/ so LCD and TaskWatcher show status."""
     try:
-        tdir = "/home/ubuntu/minipupper-app/tasks"
+        tdir = "/home/ubuntu/openclaw-app/tasks"
         for subdir in ("pending", "active"):
             d = os.path.join(tdir, subdir)
             if not os.path.isdir(d):
@@ -390,7 +390,7 @@ def _parse_hf_result(result_text, duration: float) -> dict:
 
 def _init_robot():
     """Import robot control functions (no auto-activation)."""
-    robot_dir = "/home/ubuntu/minipupper-app/robot"
+    robot_dir = "/home/ubuntu/openclaw-app/robot"
     if robot_dir not in sys.path:
         sys.path.insert(0, robot_dir)
     from robot_control import _build_movement, run_movement
@@ -957,8 +957,8 @@ def cmd_dance(url: str, genre_override: str = None, no_activate: bool = True, de
 
     # Mark the task as processing so cron doesn't re-trigger (file-per-task)
     try:
-        pending_dir = os.path.join("/home/ubuntu/minipupper-app/tasks", "pending")
-        active_dir = os.path.join("/home/ubuntu/minipupper-app/tasks", "active")
+        pending_dir = os.path.join("/home/ubuntu/openclaw-app/tasks", "pending")
+        active_dir = os.path.join("/home/ubuntu/openclaw-app/tasks", "active")
         if os.path.isdir(pending_dir):
             for fname in sorted(os.listdir(pending_dir)):
                 if not fname.endswith(".json"):
@@ -1070,8 +1070,8 @@ def cmd_execute(state_path: str) -> dict:
 
     # Update task to completed (file-per-task, move to completed dir)
     try:
-        active_dir = os.path.join("/home/ubuntu/minipupper-app/tasks", "active")
-        completed_dir = os.path.join("/home/ubuntu/minipupper-app/tasks", "completed")
+        active_dir = os.path.join("/home/ubuntu/openclaw-app/tasks", "active")
+        completed_dir = os.path.join("/home/ubuntu/openclaw-app/tasks", "completed")
         if os.path.isdir(active_dir):
             for fname in sorted(os.listdir(active_dir)):
                 if not fname.endswith(".json"):
@@ -1127,8 +1127,8 @@ def cmd_stop() -> dict:
 
     # Clean up any processing dance task (file-per-task, move to completed)
     try:
-        active_dir = os.path.join("/home/ubuntu/minipupper-app/tasks", "active")
-        completed_dir = os.path.join("/home/ubuntu/minipupper-app/tasks", "completed")
+        active_dir = os.path.join("/home/ubuntu/openclaw-app/tasks", "active")
+        completed_dir = os.path.join("/home/ubuntu/openclaw-app/tasks", "completed")
         if os.path.isdir(active_dir):
             for fname in sorted(os.listdir(active_dir)):
                 if not fname.endswith(".json"):
