@@ -5,7 +5,7 @@ Replaces HF Space's basic commands with richer, genre-appropriate moves
 generated locally. Uses the song URL as a deterministic seed so the same
 song always gets the same dance.
 
-Import chain:
+pip install yt-dlpImport chain:
     hf_dance_to_audio.py  →  local_choreography.enrich_choreography()
                                   ↓
                           robot_control.py._build_movement()
@@ -60,7 +60,7 @@ GENRE_POOLS = {
             # "backleg_lift", "bounce", "body_ellipse"
             # "look_up", "look_down", "body_row", "backleg_lift", "twerk", "butt_shrug",
             # "butt_shrug", "wiggle", "swagger"
-            "twerk", "swagger", "wiggle", "step_move"
+            "twerk", "swagger", "wiggle", 
             # "lean"
             # "step_move"
         ],
@@ -69,7 +69,7 @@ GENRE_POOLS = {
             # 0.09, 0.08, 0.08, 0.07, 0.06,
             # 0.06, 0.05, 0.07, 
             # 0.5, 0.5, # All weight on wiggle for testing
-            0.18, 0.3, 0.3, 0.22
+            0.29, 0.36, 0.35
             # 1
             
         ],
@@ -161,6 +161,21 @@ GENRE_POOLS = {
         ],
         "weights": [
             0.3, 0.35, 0.35 
+        ],
+    },
+    "complete": {
+        # Vibe: organic scanning, gentle bounces, earthy nods
+        # Signature: seek (looking around at nature), bounce, nod
+        "moves": [
+            "backleg_lift", "body_ellipse", "bounce", "butt_shrug", "dip",
+            "front_kick", "greet", "head_ellipse", "look_lowerleft", "look_lowerright",
+            "look_upperleft", "look_upperright", "shoulder_shrug", "twerk", "wiggle",
+            "swagger"        ],
+        "weights": [
+            0.050, 0.052, 0.054, 0.056, 0.058,
+            0.060, 0.062, 0.064, 0.066, 0.068,
+            0.070, 0.072, 0.074, 0.076, 0.078,
+            0.040
         ],
     },
 }

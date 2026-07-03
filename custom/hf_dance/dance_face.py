@@ -4,12 +4,13 @@ dance_face.py — Mini Pupper LCD Face Display for Dance Choreography
 Cycles through REST → TROT → HOP → FINISHHOP faces on the robot's
 LCD display, synced to the song's BPM and genre.
 
-Usage:
-    from dance_face import generate_face_cues, DanceFace
+    from dance_face import face_cues_from_choreography, DanceFace
 
-    cues = generate_face_cues(bpm=120, duration=180.0, genre="pop")
+    cues = face_cues_from_choreography(timed_moves, genre="pop")
     df = DanceFace()
     df.start(cues, stop_flag_path="/tmp/minipupper_dance_active")
+    # ... dance loop runs ...
+    df.stop()
     # ... dance loop runs ...
     df.stop()
 """
@@ -24,8 +25,14 @@ from MangDang.mini_pupper.display import Display
 LEAN_IMG_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def _show_on_lcd(img_path: str):
-    """Display a static image on the ST7789 LCD, resized and centered."""
+def _show_on_lcd(img_path: str, rotate_deg: float = 0.0):
+    """Display a static image on the ST7789 LCD, resized, centered, and optionally rotated.
+
+    Args:
+        img_path: Path to the image file.
+        rotate_deg: Rotation angle in degrees (positive = CW, negative = CCW).
+                    0 = no rotation (original behavior preserved).
+    """
     from PIL import Image
     try:
         d = Display()
@@ -36,9 +43,24 @@ def _show_on_lcd(img_path: str):
         thumb = img.copy()
         thumb.thumbnail((w, h), Image.LANCZOS)
         thumb = thumb.transpose(Image.FLIP_LEFT_RIGHT)
-        bg = Image.new("RGB", (w, h), (0, 0, 0))
-        offset = ((w - thumb.width) // 2, (h - thumb.height) // 2)
-        bg.paste(thumb, offset)
+
+        if abs(rotate_deg) > 0.5:
+            # Build a square canvas large enough so rotation doesn't clip.
+            CANVAS_SIZE = int(((w ** 2 + h ** 2) ** 0.5) * 1.2)
+            canvas = Image.new("RGB", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0))
+            offset = ((CANVAS_SIZE - thumb.width) // 2,
+                      (CANVAS_SIZE - thumb.height) // 2)
+            canvas.paste(thumb, offset)
+            cx = cy = CANVAS_SIZE // 2
+            rotated = canvas.rotate(-rotate_deg, resample=Image.BICUBIC,
+                                    center=(cx, cy), fillcolor=(0, 0, 0))
+            bg = rotated.crop((cx - w // 2, cy - h // 2,
+                               cx + w // 2, cy + h // 2))
+        else:
+            bg = Image.new("RGB", (w, h), (0, 0, 0))
+            offset = ((w - thumb.width) // 2, (h - thumb.height) // 2)
+            bg.paste(thumb, offset)
+
         tmp = "/tmp/minipupper_lean_face.png"
         bg.save(tmp)
         d.show_image(tmp)
@@ -53,57 +75,68 @@ class TiltState:
         self.roll_deg = 0.0
 
 
-LEAN_IMG_NORMAL = "dog_tilt2.webp"
-LEAN_IMG_INVERTED = "dog_tilt2inv.webp"
+LEAN_IMG_NORMAL = "display/dog_straight face-bgrmv.png"
 
 
 def tilt_display_poller(tilt_state, stop_flag_path):
-    """Poll tilt_state roll and update LCD on sign change.
+    """Poll tilt_state roll and update LCD with smooth rotation.
 
-    Pre-processes both images once at startup (resize, flip, cache as PIL Image).
-    Reuses a single Display() — no re-init, no file I/O per frame.
-    Polls at 12 Hz for tighter tracking.
+    Pre-processes the base image once at startup (resize to a safe square
+    canvas). On each poll cycle, rotates the image by the current roll
+    angle and center-crops back to display size, so the puppy image
+    smoothly follows the robot's body lean.
+
+    Reuses a single Display() — no file I/O per frame (direct SPI).
+    Polls at ~12 Hz for smooth tracking.
     """
     from PIL import Image
     d = Display()
-    w, h = d.disp.width, d.disp.height
+    w, h = d.disp.width, d.disp.height  # typically 320 x 240
 
-    inv_img = None
-    norm_img = None
-    for path, target in [
-        (os.path.join(LEAN_IMG_DIR, LEAN_IMG_INVERTED), "inv"),
-        (os.path.join(LEAN_IMG_DIR, LEAN_IMG_NORMAL), "norm"),
-    ]:
-        if not os.path.exists(path):
-            continue
-        img = Image.open(path)
-        if img.mode != "RGB":
-            img = img.convert("RGB")
-        thumb = img.copy()
-        thumb.thumbnail((w, h), Image.LANCZOS)
-        thumb = thumb.transpose(Image.FLIP_LEFT_RIGHT)
-        bg = Image.new("RGB", (w, h), (0, 0, 0))
-        offset = ((w - thumb.width) // 2, (h - thumb.height) // 2)
-        bg.paste(thumb, offset)
-        if target == "inv":
-            inv_img = bg
-        else:
-            norm_img = bg
-
-    if inv_img is None or norm_img is None:
+    # Load single base image (no more inverted flip)
+    base_path = os.path.join(LEAN_IMG_DIR, LEAN_IMG_NORMAL)
+    if not os.path.exists(base_path):
         return
 
-    last_sign = 0
+    img = Image.open(base_path)
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    thumb = img.copy()
+    thumb.thumbnail((w, h), Image.LANCZOS)
+    thumb = thumb.transpose(Image.FLIP_LEFT_RIGHT)
+
+    # Build a square canvas large enough so rotation never clips the viewport.
+    CANVAS_SIZE = int(((w ** 2 + h ** 2) ** 0.5) * 1.2)  # ~480px
+    base_canvas = Image.new("RGB", (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0))
+    ox, oy = (CANVAS_SIZE - thumb.width) // 2, (CANVAS_SIZE - thumb.height) // 2
+    base_canvas.paste(thumb, (ox, oy))
+
+    cx = cy = CANVAS_SIZE // 2
+    half_w, half_h = w // 2, h // 2
+
+    last_angle = None
     while os.path.exists(stop_flag_path):
         roll = tilt_state.roll_deg
-        sign = 1 if roll > 3 else (-1 if roll < -3 else 0)
-        if sign != 0 and sign != last_sign:
-            img = inv_img if sign < 0 else norm_img
-            try:
-                d.disp.display(img)  # direct SPI, no file I/O
-            except Exception:
-                pass
-            last_sign = sign
+
+        # Small deadzone to avoid jitter at neutral
+        angle = 0.0 if abs(roll) < 1.0 else float(roll)
+
+        # Only update when angle changes by more than 0.5 deg
+        if last_angle is not None and abs(angle - last_angle) < 0.5:
+            time.sleep(0.08)
+            continue
+
+        # Rotate the entire canvas (image stays centered, corners stay black)
+        rotated = base_canvas.rotate(-angle, resample=Image.BICUBIC,
+                                     center=(cx, cy), fillcolor=(0, 0, 0))
+        # Center-crop back to display size
+        crop = rotated.crop((cx - half_w, cy - half_h,
+                             cx + half_w, cy + half_h))
+        try:
+            d.disp.display(crop)
+        except Exception:
+            pass
+        last_angle = angle
         time.sleep(0.08)
 
 
@@ -147,44 +180,6 @@ GENRE_PACING = {
 DEFAULT_PACING = 4
 
 
-def generate_face_cues(bpm: float, duration: float, genre: str = "pop") -> list:
-    """
-    Generate face-change cues synced to BPM and genre pacing.
-
-    Returns list of (cmd, time_acc, angle, start_time) tuples compatible
-    with the dance timetable format.
-
-    Fields:
-        cmd        = "display"  (sentinel for the dance loop)
-        time_acc   = 0.0        (instant -- no acceleration)
-        angle      = float      (BehaviorState.value)
-        start_time = float      (seconds from audio start)
-    """
-    if bpm <= 0:
-        bpm = 120
-
-    beat_s = 60.0 / bpm
-    pacing = GENRE_PACING.get(genre.lower(), DEFAULT_PACING)
-    cycle_len = len(FACE_CYCLE)
-
-    cues = []
-    beat_num = 0
-
-    while True:
-        t = beat_num * beat_s
-        if t > duration:
-            break
-
-        if beat_num % pacing == 0:
-            idx = (beat_num // pacing) % cycle_len
-            state_val = float(FACE_CYCLE[idx].value)
-            cues.append(("display", 0.0, state_val, t))
-
-        beat_num += 1
-
-    return cues
-
-
 def _resolve_state(val: float) -> BehaviorState:
     """Convert a stored float back to a BehaviorState enum member."""
     try:
@@ -221,7 +216,7 @@ class DanceFace:
 
         Args:
             cues: (cmd, time_acc, angle, start_time) tuples from
-                  generate_face_cues(), OR simpler (state_val, time) pairs.
+                  face_cues_from_choreography(), OR simpler (state_val, time) pairs.
             audio_delay: Seconds to offset all cue times by.
             stop_flag_path: Thread stops if this file disappears.
         """
@@ -294,8 +289,15 @@ class DanceFace:
             try:
                 if isinstance(val_or_path, int):
                     self.disp.show_state(_resolve_state(val_or_path))
+                elif isinstance(val_or_path, dict):
+                    # Dict cue: {"path": ..., "angle": ...} for rotated images
+                    img_path = val_or_path.get("path", "")
+                    angle = val_or_path.get("angle", 0.0)
+                    full_path = os.path.join(LEAN_IMG_DIR, img_path) if not os.path.isabs(img_path) else img_path
+                    if os.path.exists(full_path):
+                        _show_on_lcd(full_path, rotate_deg=float(angle))
                 else:
-                    # Image cue: val_or_path is a file path (relative or absolute)
+                    # Image cue: val_or_path is a file path (string)
                     full_path = os.path.join(LEAN_IMG_DIR, val_or_path) if not os.path.isabs(val_or_path) else val_or_path
                     if os.path.exists(full_path):
                         _show_on_lcd(full_path)
@@ -317,7 +319,7 @@ def face_cues_from_choreography(timed_moves: list, genre: str = "pop") -> list:
 
     Returns:
         List of (cmd, time_acc, angle, start_time) tuples in the same
-        format as generate_face_cues().
+        format as face_cues_from_choreography().
     """
     if not timed_moves or not isinstance(timed_moves, list):
         return []

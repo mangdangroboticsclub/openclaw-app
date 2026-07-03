@@ -33,12 +33,10 @@ import subprocess
 import sys
 import time
 from local_choreography import enrich_choreography, set_logger, _resolve_genre, _map_angle, GENRE_POOLS
-from dance_face import generate_face_cues, face_cues_from_choreography, DanceFace, TiltState, tilt_display_poller
+from dance_face import face_cues_from_choreography, DanceFace, TiltState, tilt_display_poller
 import random
 import hashlib
 import threading
-
-# -- HF API -----------------------------------------------------------------
 
 # -- Constants ---------------------------------------------------------------
 DANCE_ACTIVE_FLAG = "/tmp/minipupper_dance_active"
@@ -52,7 +50,6 @@ DOWNLOAD_DIR = "/tmp/minipupper_music"
 WAV_DIR = "/tmp/minipupper_dance_wav"
 CACHE_FILE = "/tmp/minipupper_dance_cache.json"
 
-# -- Logging
 # -- Logging -----------------------------------------------------------------
 
 def _log(msg: str):
@@ -85,7 +82,6 @@ def _find_active_pcm():
                 return True
         except (OSError, IOError):
             continue
-    return False
     return False
 
 
@@ -134,61 +130,45 @@ def _audio_monitor(player, stop_flag_path, poll_interval=1.0, debounce=2,
 
 # -- PID Tracking ------------------------------------------------------------
 
-def _find_dance_pid():
-    """Return PID of the dance background process, or None."""
+def _pid_from_file(path: str):
+    """Return PID from a PID file, or None if not found/alive."""
     try:
-        if os.path.exists(DANCE_PID_FILE):
-            with open(DANCE_PID_FILE) as f:
+        if os.path.exists(path):
+            with open(path) as f:
                 pid = int(f.read().strip())
             try:
                 os.kill(pid, 0)
                 return pid
             except (OSError, ProcessLookupError):
                 pass
-
     except (ValueError, OSError):
         pass
-
     return None
 
-def _find_audio_pid():
-    """Return PID of running ffplay (audio playback), or None."""
+def _graceful_kill(pid: int, label: str = "process"):
+    """SIGTERM, wait up to 2s, SIGKILL if still alive."""
     try:
-        if os.path.exists(AUDIO_PID_FILE):
-            with open(AUDIO_PID_FILE) as f:
-                pid = int(f.read().strip())
+        os.kill(pid, signal.SIGTERM)
+        for _ in range(10):
             try:
                 os.kill(pid, 0)
-                return pid
-            except (OSError, ProcessLookupError):
-                pass
+                time.sleep(0.2)
+            except ProcessLookupError:
+                return
+        try:
+            os.kill(pid, 0)
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    except Exception as e:
+        _log(f"Error killing {label} (PID {pid}): {e}")
 
-    except (ValueError, OSError):
-        pass
-
-    return None
 
 def _stop_audio():
     """Kill audio player and clear flags."""
-    pid = _find_audio_pid()
+    pid = _pid_from_file(AUDIO_PID_FILE)
     if pid is not None:
-        try:
-            os.kill(pid, signal.SIGTERM)
-            for _ in range(10):
-                try:
-                    os.kill(pid, 0)
-                    time.sleep(0.2)
-                except ProcessLookupError:
-                    pass
-                    break
-            try:
-                os.kill(pid, 0)
-                os.kill(pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-
-        except Exception as e:
-            _log(f"Error stopping audio: {e}")
+        _graceful_kill(pid, "audio player")
     for f in [AUDIO_PID_FILE, MUSIC_ACTIVE_FLAG]:
         try:
             os.remove(f)
@@ -213,7 +193,7 @@ def _set_music_active(active: bool):
         except OSError:
             pass
 
-def _set_volume(pct: str = "70%"):
+def _set_volume(pct: str = "90%"):
     """Set speaker volume via shared audio_util (auto-detects card)."""
     try:
         sys.path.insert(0, "/home/ubuntu/minipupper-app")
@@ -387,7 +367,6 @@ def _parse_hf_result(result_text, duration: float) -> dict:
                 parsed = raw
     except (json.JSONDecodeError, IndexError, KeyError) as e:
         _log(f"HF non-JSON response: {text[:100]}")
-        pass
 
     if not parsed or "error" in parsed:
         return {"error": parsed.get("error", "Could not parse HF Space response")}
@@ -425,35 +404,6 @@ def _activate_robot(build_movement, run_movement):
     run_movement(lib, timeout=5.0)
     _log("Robot activated.")
 
-LEAN_IMG_NORMAL = "dog_tilt2.webp"
-LEAN_IMG_INVERTED = "dog_tilt2inv.webp"
-
-
-def generate_lean_move_cues(timed_choreography: list) -> list:
-    """Generate image cues for lean choreography.
-
-    Each lean command corresponds to one body_row sub-move internally.
-    4 consecutive leans map to: +20, +10 (inverted), -10, -20 (normal).
-    Show inverted for first 2, normal for next 2, repeat.
-    Skip consecutive dupes to avoid LCD flicker.
-    Returns list of ("image", 0.0, filename, start_time) tuples.
-    """
-    cues = []
-    lean_count = 0
-    last_img = LEAN_IMG_INVERTED
-    for cmd, _, angle, start_time in timed_choreography:
-        if cmd == "lean":            
-            img = LEAN_IMG_NORMAL if (lean_count // 2) % 2 == 0 else LEAN_IMG_INVERTED
-            if img == last_img:
-                lean_count += 1
-                continue
-            else:
-                cues.append(("image", 0.0, img, start_time))
-                last_img = img
-                lean_count += 1
-    return cues
-
-
 def _choreography_loop(build_movement, run_movement,
                        beat_info: dict, timed_choreography: list,
                        wav_file: str, title: str,
@@ -475,24 +425,11 @@ def _choreography_loop(build_movement, run_movement,
         pass
 
     # Set volume
-    _set_volume("70%")
+    _set_volume("90%")
     _set_music_active(True)
 
     # Pre-sort moves so we can calculate timing before audio starts
     sorted_moves = sorted(timed_choreography, key=lambda m: m[3])
-
-    # # ── Pre-expand "lean" commands into body_row sub-moves ──
-    # # Both movement builder and cue generator read the actual angle.
-    # expanded_moves = []
-    # for cmd, time_acc, angle, start_time in sorted_moves:
-    #     if cmd == "lean":
-    #         sub_angles = [20, 10, -10, -20]
-    #         sub_dur = max(time_acc, 0.05)
-    #         for i, sa in enumerate(sub_angles):
-    #             expanded_moves.append(("body_row", sub_dur, sa, start_time + i * sub_dur))
-    #     else:
-    #         expanded_moves.append((cmd, time_acc, angle, start_time))
-    # sorted_moves = expanded_moves
 
     if sorted_moves:
         first_time_acc = sorted_moves[0][1]
@@ -535,7 +472,7 @@ def _choreography_loop(build_movement, run_movement,
         )
     player = subprocess.Popen(
         ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet",
-         "-af", "volume=0.70", wav_file],
+         "-af", "volume=0.90", wav_file],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
@@ -655,9 +592,6 @@ def _choreography_loop(build_movement, run_movement,
     }
 
 
-
-
-
 def _load_cache():
     try:
         with open(CACHE_FILE) as f:
@@ -670,7 +604,7 @@ def _save_cache(cache: dict):
         json.dump(cache, f, indent=2)
 
 def _detect_genre_from_url(url: str) -> dict:
-    """Detect song genre from YouTube metadata."""
+    """Detect song genre from YouTube metadata (tags, channel, title keywords)."""
     _log(f'Detecting genre for: {url}')
     try:
         meta = subprocess.run(
@@ -699,7 +633,6 @@ def _detect_genre_from_url(url: str) -> dict:
             "pop": ["pop", "k-pop", "j-pop", "chart", "mainstream"],
         }
 
-        # Score each genre
         scores = {g: 0 for g in genre_keywords}
         for genre, keywords in genre_keywords.items():
             for kw in keywords:
@@ -723,6 +656,17 @@ def _detect_genre_from_url(url: str) -> dict:
     except Exception as e:
         _log(f'Genre detection error: {e}')
         return {"genre": "pop", "genre_display": "Pop"}
+
+
+def cmd_classify(url: str) -> dict:
+    """Detect genre for a YouTube URL without dancing."""
+    result = _detect_genre_from_url(url)
+    return {
+        "ok": True,
+        "url": url,
+        "genre": result.get("genre", "pop"),
+        "genre_display": result.get("genre_display", "Pop"),
+    }
 
 
 def cmd_search(query: str) -> dict:
@@ -796,7 +740,66 @@ def _generate_choreography_from_slots(beat_slots: list, genre: str, seed: str) -
     _log(f"Local choreography from slots: {len(timed)} moves, genre={canonical_genre}")
     return timed
 
-def cmd_dance(url: str, genre_override: str = None, no_activate: bool = True) -> dict:
+DEBUG_FILE = "/tmp/minipupper_dance_debug.json"
+
+
+def _log_debug_choreography(timed: list, genre: str, seed: str, seed_int: int,
+                             beat_info: dict, pool: dict):
+    """Print deterministic seed, genre pool, and every move for debugging."""
+    canonical = _resolve_genre(genre)
+    bpm = beat_info.get("bpm", "?")
+    duration = beat_info.get("duration", "?")
+
+    header = [
+        "=" * 55,
+        f"  Seed:       {seed}",
+        f"  SHA-256:    {seed_int}",
+        f"  Genre:      {genre} ({canonical})",
+        f"  BPM:        {bpm}",
+        f"  Duration:   {duration:.1f}s" if isinstance(duration, (int, float)) else f"  Duration:   {duration}",
+        f"  Total moves:{len(timed)}",
+        f"  Pool moves: {', '.join(pool.get('moves', []))}",
+        f"  Weights:    {pool.get('weights', [])}",
+        "=" * 55,
+    ]
+    # Pad the seed line if it's a URL to keep it readable
+    print("\n".join(header))
+    print(f"  {'Time':>8s}  {'Move':<20s}  {'Angle':>6s}  {'TimeAcc':>7s}")
+    print("  " + "-" * 48)
+    for cmd, time_acc, angle, start_time in timed:
+        angle_str = f"{angle:.0f}°" if isinstance(angle, (int, float)) else str(angle)
+        print(f"  {start_time:>7.2f}s  {cmd:<20s}  {angle_str:>6s}  {time_acc:<7.3f}")
+    print("=" * 55)
+    print()
+
+    # Save full debug JSON
+    try:
+        debug_data = {
+            "seed": seed,
+            "seed_sha256_hex": hex(seed_int),
+            "genre": genre,
+            "canonical_genre": canonical,
+            "bpm": bpm,
+            "duration": duration,
+            "pool_moves": pool.get("moves", []),
+            "pool_weights": pool.get("weights", []),
+            "moves": [
+                {
+                    "time": start_time,
+                    "move": cmd,
+                    "angle": angle,
+                    "time_acc": time_acc,
+                }
+                for cmd, time_acc, angle, start_time in timed
+            ],
+        }
+        with open(DEBUG_FILE, "w") as f:
+            json.dump(debug_data, f, indent=2)
+    except OSError:
+        pass
+
+
+def cmd_dance(url: str, genre_override: str = None, no_activate: bool = True, debug: bool = False) -> dict:
     """
     Download -> HF beat analysis -> launch background dance -> return.
 
@@ -886,7 +889,11 @@ def cmd_dance(url: str, genre_override: str = None, no_activate: bool = True) ->
     if not beat_slots:
         return {"ok": False, "error": "HF Space did not return beat_slots"}
 
-    genre = genre_override if genre_override else "pop"
+    if genre_override:
+        genre = genre_override
+    else:
+        detected = _detect_genre_from_url(url)
+        genre = detected.get("genre", "pop")
     genre_display = GENRE_DISPLAY_NAMES.get(genre, f"\U0001f3a4 {genre.capitalize()}")
 
     # Generate genre-appropriate timed moves from Space timing slots
@@ -895,6 +902,13 @@ def cmd_dance(url: str, genre_override: str = None, no_activate: bool = True) ->
     # Expand compound moves (dip, spin) into atomic sub-moves
     timed = enrich_choreography(timed, genre, url or title)
     _log(f"Final choreography: {len(timed)} moves, genre: {genre_display}")
+
+    # Debug output
+    if debug:
+        pool = GENRE_POOLS.get(_resolve_genre(genre), GENRE_POOLS["pop"])
+        seed_int = int(hashlib.sha256((url or title).encode()).hexdigest(), 16)
+        _log_debug_choreography(timed, genre, url or title, seed_int,
+                                beat_info, pool)
 
     # Generate face-display cues from actual choreography timestamps
     duration = beat_info.get("duration", 180.0)
@@ -1006,8 +1020,6 @@ def cmd_execute(state_path: str) -> dict:
     # Initialize robot
     try:
         build_movement, run_movement = _init_robot()
-        # if not no_activate:
-        #     _activate_robot(build_movement, run_movement)
     except Exception as e:
         result = {"ok": False, "error": f"Robot init failed: {e}"}
         with open(DANCE_RESULT_FILE, "w") as f:
@@ -1098,26 +1110,10 @@ def cmd_execute(state_path: str) -> dict:
 
 def _stop_background_dance():
     """Kill the dance background subprocess immediately."""
-    pid = _find_dance_pid()
+    pid = _pid_from_file(DANCE_PID_FILE)
     if pid is not None:
         _log(f"Killing dance process PID {pid}")
-        try:
-            os.kill(pid, signal.SIGTERM)
-            for _ in range(10):
-                try:
-                    os.kill(pid, 0)
-                    time.sleep(0.2)
-                except ProcessLookupError:
-                    pass
-                    break
-            try:
-                os.kill(pid, 0)
-                os.kill(pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-
-        except Exception as e:
-            _log(f"Error killing dance process: {e}")
+        _graceful_kill(pid, "dance process")
 
 def cmd_stop() -> dict:
     """Stop dancing and audio playback immediately."""
@@ -1155,17 +1151,8 @@ def cmd_stop() -> dict:
     except Exception as e:
         _log(f"Cleanup error: {e}")
 
-    # THEN: Deactivate robot BEFORE killing the background process
-    # (SIGKILL kills immediately — deactivation won't run in cmd_execute)
-    try:
-        _log("Deactivating robot...")
-    #     subprocess.run(
-    #         ["python3", "/home/ubuntu/minipupper-app/robot/robot_control.py", "deactivate"],
-    #         capture_output=True, timeout=5.0,
-    #     )
-    #     _log("Robot deactivated.")
-    except Exception as e:
-        _log(f"Deactivation error: {e}")
+    # Deactivation handled by cmd_execute background process
+    _log("Deactivating robot...")
 
     # THEN: Kill the background process
     _stop_background_dance()
@@ -1187,8 +1174,8 @@ def cmd_stop() -> dict:
 
 def cmd_status() -> dict:
     """Check dance status."""
-    dance_pid = _find_dance_pid()
-    audio_pid = _find_audio_pid()
+    dance_pid = _pid_from_file(DANCE_PID_FILE)
+    audio_pid = _pid_from_file(AUDIO_PID_FILE)
     flag_active = os.path.exists(DANCE_ACTIVE_FLAG)
     result_exists = os.path.exists(DANCE_RESULT_FILE)
     return {
@@ -1233,12 +1220,17 @@ def main():
     p_search = subparsers.add_parser("search", help="Search YouTube")
     p_search.add_argument("query", nargs="+")
 
+    p_classify = subparsers.add_parser("classify", help="Test genre detection for a URL without dancing")
+    p_classify.add_argument("url", help="YouTube URL")
+
     p_dance = subparsers.add_parser("dance", help="Download audio and dance via HF (background)")
     p_dance.add_argument("url", help="YouTube URL")
     p_dance.add_argument("--genre", "-g", default=None,
                         help="Genre override (rock, classical, pop, jazz, electronic, hiphop, chill)")
     p_dance.add_argument("--no-activate", action="store_true",
                         help="Skip robot activation (assume already standing)")
+    p_dance.add_argument("--debug", "-d", action="store_true",
+                        help="Print seed, genre pool, and every move for debugging")
 
     p_exec = subparsers.add_parser("execute", help="Internal: run choreography")
     p_exec.add_argument("state_file", help="Dance state JSON path")
@@ -1254,8 +1246,10 @@ def main():
 
     if args.command == "search":
         result = cmd_search(" ".join(args.query))
+    elif args.command == "classify":
+        result = cmd_classify(args.url)
     elif args.command == "dance":
-        result = cmd_dance(args.url, genre_override=args.genre, no_activate=args.no_activate)
+        result = cmd_dance(args.url, genre_override=args.genre, no_activate=args.no_activate, debug=args.debug)
     elif args.command == "process-task":
         result = cmd_process_task(args.task_file)
     elif args.command == "execute":
