@@ -90,7 +90,12 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
 
     elif command in ("left", "l"):
         move.gait_uni(v_x=0, v_y=SPEED, time_uni=duration, time_acc=ACCEL)
-
+    elif command in ("keeper"):
+        move.gait_uni(v_x=0, v_y=-SPEED, time_uni=1, time_acc=ACCEL)
+        move.gait_uni(v_x=0, v_y=SPEED, time_uni=1, time_acc=ACCEL)
+        move.gait_uni(v_x=0, v_y=SPEED, time_uni=1, time_acc=ACCEL)
+        move.gait_uni(v_x=0, v_y=-SPEED, time_uni=1, time_acc=ACCEL)
+        move.stop()
     # ── Rotation ──
     elif command in ("cw", "rotate_cw", "turn_right"):
         move.rotate(angle=(angle if angle else 30))
@@ -120,6 +125,11 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
 
     elif command in ("look-lower-right", "look_lowerright", "lower-right", "lowerright"):
         move.head_move(pitch_deg=-15, yaw_deg=20, time_uni=duration, time_acc=time_acc)
+
+    elif command in ("right_kick"):
+       #  move.gait_uni(v_x=SPEED, v_y=0, time_uni=2, time_acc=ACCEL)
+        move.right_kick (ht=0.4, time_uni=0.3, time_acc=0.05)
+        move.stop()
 
         
         
@@ -231,10 +241,10 @@ def _build_movement(command: str, duration: float, angle: float, time_acc: float
         move.kick("left", ht=0.1, time_uni=0.05, time_acc=0.05)
         move.stop(time=0.1)
 
-    elif command == "right_kick":
-        # move.lift_kick ("right", ht=0.05, time_uni=1, time_acc=0.5)
-        move.kick("right", ht=0.1, time_uni=0.05, time_acc=0.05)
-        # move.stop(time=0.1)
+    # elif command == "right_kick":
+    #     # move.lift_kick ("right", ht=0.05, time_uni=1, time_acc=0.5)
+    #     move.kick("right", ht=0.1, time_uni=0.05, time_acc=0.05)
+    #     # move.stop(time=0.1)
               
         
     elif command == "backleg_lift":
