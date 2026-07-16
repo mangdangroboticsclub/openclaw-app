@@ -1,7 +1,7 @@
 # Minipupper Operator — Voice-First AI Assistant
 
-**Status:** Phase 2 Active (Audio Pipeline ✅ — OpenClaw Agent Integration ✅ — Complex Tasks ✅)  
-**Last Updated:** 2026-05-29  
+**Status:** Phase 2 Active (Audio Pipeline ✅ — OpenClaw Agent Integration ✅ — Complex Tasks ✅)
+**Last Updated:** 2026-07-16
 **Platform:** Mini Pupper v2 Robot (Raspberry Pi CM4, Ubuntu, Debian 11)
 
 ---
@@ -89,6 +89,123 @@ Direct reply                      Write to tasks.json
 
 ---
 
+## Getting Started
+
+### One-Script Setup (Recommended)
+
+The fastest way to set up a new Mini Pupper:
+
+```bash
+# 1. Connect to your Mini Pupper via VS Code Remote-SSH
+#    (Cmd/Ctrl+Shift+P -> Remote-SSH: Connect to Host -> ubuntu@<your-pi-ip>)
+#    Then open a terminal inside VS Code (Ctrl+`)
+
+# 2. Clone the repo onto the Pi
+cd ~
+git clone https://github.com/mangdangroboticsclub/openclaw-app.git -b master
+cd openclaw-app
+
+# 3. Run the automated setup script
+bash scripts/setup.sh
+```
+
+The script will walk you through:
+1. ✅ Install Node.js 22, OpenClaw, Tailscale, Python deps
+2. ✅ Copy config files to `~/openclaw-app/`
+3. ✅ Connect the Pi as an OpenClaw node
+
+**Before running**, have ready:
+- Your Gateway server's Tailscale address
+- Your Google Cloud service account key (`api_key.json`)
+- The `OPENCLAW_GATEWAY_TOKEN` from your Gateway config
+
+Once the setup is complete, see the detailed [Onboarding](ONBOARDING.md) to continue installation.
+
+### Manual Setup
+
+If you prefer to set up step by step, see the detailed [Setup Guide](docs/SETUP_GUIDE.md) or [Quick Start](QUICKSTART.md).
+
+---
+
+## Configuration
+
+### `config/config.yaml` — Main Settings
+
+```yaml
+app:
+  debug: true
+  log_level: INFO
+  version: 0.1.0
+
+audio:
+  asr:
+    engine: google          # Google Cloud Speech-to-Text (primary)
+    streaming: true
+    language: en-US
+    # Fallback: "whisper"   # Faster-Whisper local model
+  tts:
+    engine: google          # Google Cloud TTS
+    voice: en-US-Neural2-A
+    pitch: 0.0
+    speed: 1.0
+
+operator:
+  llm_provider: gemini          # Google Vertex AI (Gemini)
+  llm_model: gemini-2.5-flash   # Current active model
+  enable_tool_execution: true
+  max_context_length: 8192
+  max_response_tokens: 500
+  response_timeout_seconds: 30
+  role: minipupper_autonomous
+  movements:
+    enabled: true
+    max_speed: 100
+
+barge_in:
+  enabled: true
+  vad_aggressiveness: 2
+  aec_enabled: true
+  aec_double_talk_ratio: 1.2
+  aec_max_delay_ms: 180
+  aec_max_gain: 1.5
+  echo_suppression_threshold: 0.85
+  echo_energy_ratio: 1.0
+  nearend_frames_required: 8
+  nearend_min_cleaned_rms: 500
+  nearend_mic_to_playback_ratio: 1.5
+  silence_duration_ms: 300
+  detection_timeout_ms: 90
+  frame_duration_ms: 30
+  startup_grace_ms: 300
+
+network:
+  gateway_url: ${OPENCLAW_GATEWAY_URL}
+  session_target: agent:main:dashboard:*             # Stable session key
+  cron_job_id: a3dc8f0c-c459-43b2-8cde-3fa014124c0c # Task processor cron
+  tailscale_enabled: true
+  default_port: 8888
+  local_network: true
+```
+
+### `.env` — Environment Variables
+
+```bash
+cp config/.env.sample config/.env
+# Edit with your values:
+GOOGLE_APPLICATION_CREDENTIALS=/home/ubuntu/apps-md-robots/api_key.json
+GOOGLE_CLOUD_PROJECT_ID=your-project-id
+OPENCLAW_GATEWAY_URL=wss://your-gateway:443/ws
+```
+
+### Barge-in Tuning
+
+- Use `scripts/calibrate_aec.py` to measure echo delay/gain for your hardware
+- Adjust `nearend_min_cleaned_rms` (lower = more sensitive, default 500)
+- Adjust `vad_aggressiveness` (0-3, default 2)
+- Test with `scripts/test_bargein.py`
+
+---
+
 ## Key Features
 
 ### 🎤 Audio Pipeline (Phase 1 — Complete)
@@ -97,8 +214,8 @@ Direct reply                      Write to tasks.json
 - **TTS:** Google Cloud TTS with natural voices (en-US-Neural2-A)
 - **Barge-in:** Streaming VAD with in-app Acoustic Echo Cancellation (AEC)
   - Double-talk detection, echo suppression, near-end gating
-  - Calibration script: `scripts/calibrate_aec.py` --> ran once if changing input medium
-  - Tuning via `config.yaml` `barge_in.*` section --> for adjusting sensitivity
+  - Calibration script: `scripts/calibrate_aec.py` → run once if changing input medium
+  - Tuning via `config.yaml` `barge_in.*` section → for adjusting sensitivity
 
 ### 🤖 OpenClaw Gateway Integration (Phase 2 — Active)
 
@@ -106,8 +223,7 @@ Direct reply                      Write to tasks.json
 - **Gateway WebSocket client** — `src/openclaw/client.py` with Ed25519 signed handshake
 - **Task Watcher** — `src/core/task_watcher.py` polls every 2s, announces results via TTS
 - **Task Archiver** — `src/core/task_archiver.py` moves completed tasks to date-partitioned archive
-- **Protocol Handler** — `src/core/protocol_handler.py` parses agent messages
-(e.g TTS from Task Watcher)
+- **Protocol Handler** — `src/core/protocol_handler.py` parses agent messages (e.g TTS from Task Watcher)
 - **Wake Signal** — App triggers cron via `scripts/send_wake.py` (cron.run RPC)
 
 #### Task JSON Format
@@ -208,6 +324,7 @@ minipupper-app/
 │   ├── config.yaml             # Main configuration (audio, barge-in, operator, network)
 │   ├── .env                    # Environment variables (credentials)
 │   ├── .env.sample             # Environment variable template
+│   ├── api_key.json.example    # Google Cloud service account key template
 │   ├── system_prompt.txt       # Base Gemini system prompt
 │   └── system_prompt_phase2.txt# Phase 2 system prompt with [TASK] offloading
 │
@@ -224,7 +341,7 @@ minipupper-app/
 │   ├── openclaw/
 │   │   └── client.py           # Gateway WebSocket client (Ed25519 handshake)
 │   └── robot/
-│   │   └── (reserved)
+│       └── (reserved)
 │
 ├── robot/
 │   ├── robot_control.py        # FPC MovementLib CLI commands
@@ -232,7 +349,7 @@ minipupper-app/
 │
 ├── custom/
 │   ├── photo_analysis/main.py           # Gemini Vision photo analysis
-│   ├── look_here.py                         # Gesture following (3 photos)
+│   ├── look_here.py                     # Gesture following (3 photos)
 │   ├── calorie_calculator.py            # Food photo → calorie estimates
 │   ├── camera_person_follower.py        # Person follower (FPC API)
 │   ├── camera_person_follow/            # HOG + PID person following
@@ -242,14 +359,15 @@ minipupper-app/
 │   └── touch_respond.py                 # Touch panel daemon
 │
 ├── scripts/
-│   ├── capture_and_show.py      # Camera capture + LCD display
-│   ├── send_wake.py             # Trigger Gateway cron for task processing
-│   ├── manage_archives.py       # Task archive CLI utility
-│   ├── calibrate_aec.py         # In-app AEC calibration
-│   ├── test_bargein.py          # Continuous barge-in test harness
-│   ├── test_pipeline.py         # ASR → LLM → TTS pipeline test
-│   ├── display_task_info.py     # Show task status on ST7789 LCD
-│   └── start_with_aec.sh        # Start with AEC enabled
+│   ├── setup.sh                         # 🚀 One-script automated setup
+│   ├── capture_and_show.py              # Camera capture + LCD display
+│   ├── send_wake.py                     # Trigger Gateway cron for task processing
+│   ├── manage_archives.py               # Task archive CLI utility
+│   ├── calibrate_aec.py                 # In-app AEC calibration
+│   ├── test_bargein.py                  # Continuous barge-in test harness
+│   ├── test_pipeline.py                 # ASR → LLM → TTS pipeline test
+│   ├── display_task_info.py             # Show task status on ST7789 LCD
+│   └── start_with_aec.sh                # Start with AEC enabled
 │
 ├── knowledge/                   # 17 indexed knowledge files for agent reference
 │   ├── INDEX.json               # Knowledge index with summaries
@@ -269,101 +387,21 @@ minipupper-app/
 ├── docs/
 │   ├── ARCHITECTURE.md         # System design & data flow
 │   ├── OPENCLAW_INTEGRATION.md # Gateway integration details
-│   ├── CURRENT_STATE.md       # Current development status
+│   ├── CURRENT_STATE.md        # Current development status
 │   ├── PROGRESS.md             # Development log with dates
-│   ├── SETUP_GUIDE.md          # Complete setup instructions
+│   ├── SETUP_GUIDE.md          # Complete manual setup instructions
 │   ├── DEPLOYMENT_GUIDE.md     # Operations guide
 │   ├── TASK_ARCHIVING.md       # Task archive system documentation
 │   ├── BARGE_IN_GUIDE.md       # Barge-in implementation details
 │   ├── TESTING_PLAN.md         # Test strategy & checklist
 │   ├── GOOGLE_CLOUD_SETUP.md   # Google Cloud credential setup
 │   ├── audio-architecture.md   # Audio subsystem deep dive
-│   ├── phase3-complex-tasks.md  # Phase 3 complex task documentation
+│   ├── phase3-complex-tasks.md # Phase 3 complex task documentation
 │   └── phase3-overhaul.md      # Phase 3 overhaul notes
-�R
+
 └── tasks_archive/              # Date-partitioned completed tasks
-    └── YYVN-MM-DD.json
+    └── YYYY-MM-DD.json
 ```
-
----
-
-## Configuration
-
-### `config/config.yaml` — Main Settings
-
-```yaml
-app:
-  debug: true
-  log_level: INFO
-  version: 0.1.0
-
-audio:
-  asr:
-    engine: google          # Google Cloud Speech-to-Text (primary)
-    streaming: true
-    language: en-US
-    # Fallback: "whisper"   # Faster-Whisper local model
-  tts:
-    engine: google          # Google Cloud TTS
-    voice: en-US-Neural2-A
-    pitch: 0.0
-    speed: 1.0
-
-operator:
-  llm_provider: gemini          # Google Vertex AI (Gemini)
-  llm_model: gemini-2.5-flash   # Current active model
-  enable_tool_execution: true
-  max_context_length: 8192
-  max_response_tokens: 500
-  response_timeout_seconds: 30
-  role: minipupper_autonomous
-  movements:
-    enabled: true
-    max_speed: 100
-
-barge_in:
-  enabled: true
-  vad_aggressiveness: 2
-  aec_enabled: true
-  aec_double_talk_ratio: 1.2
-  aec_max_delay_ms: 180
-  aec_max_gain: 1.5
-  echo_suppression_threshold: 0.85
-  echo_energy_ratio: 1.0
-  nearend_frames_required: 8
-  nearend_min_cleaned_rms: 500
-  nearend_mic_to_playback_ratio: 1.5
-  silence_duration_ms: 300
-  detection_timeout_ms: 90
-  frame_duration_ms: 30
-  startup_grace_ms: 300
-
-network:
-  gateway_url: ${OPENCLAW_GATEWAY_URL}
-  session_target: agent:main:dashboard:*             # Stable session key
-  cron_job_id: b14924c7-a25a-4938-a7c2-3b6220ba5d62 # Task processor cron
-  tailscale_enabled: true
-  default_port: 8888
-  local_network: true
-```
-
-See `config/config.yaml` for all current values.
-
-### `.env` -- Environment Variables
-
-```bash
-cp config/.env.sample config/.env
-# Edit with your values:GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
-GOOGLE_CLOUD_PROJECT_ID=your-project-id
-OPENCLAW_GATEWAY_URL=wss://your-gateway:443/ws
-```
-
-### Barge-in Tuning
-
-- Use `scripts/calibrate_aec.py` to measure echo delay/gain for your hardware
-- Adjust `nearend_min_cleaned_rms` (lower = more sensitive, default 500)
-- Adjust `vad_aggressiveness` (0-3, default 2)
-- Test with `scripts/test_bargein.py`
 
 ---
 
@@ -374,16 +412,26 @@ OPENCLAW_GATEWAY_URL=wss://your-gateway:443/ws
 - Microphone + speakers connected
 - Python 3.9+ installed
 - Google Cloud account with Speech-to-Text, TTS, and Vertex AI APIs
-- WebRTC VAD
 - Tailscale for cloud connectivity (optional for local-only)
 
-### Installation
+### 🚀 Automated Setup (Recommended)
+
+```bash
+cd ~
+git clone https://github.com/mangdangroboticsclub/openclaw-app.git
+cd openclaw-app
+./scripts/setup.sh
+```
+
+Follow the prompts. The script handles everything: Node.js, OpenClaw, Tailscale, Python deps, configs, node connection, and dashboard.
+
+### Manual Installation
 
 ```bash
 # 1. Clone repository
-cd /home/minipupper
-git clone https://github.com/mangdangroboticsclub/minipupper-app.git
-cd minipupper-app
+cd ~
+git clone https://github.com/mangdangroboticsclub/openclaw-app.git
+cd openclaw-app
 
 # 2. Create Python environment
 python3.10 -m venv venv
@@ -402,6 +450,7 @@ cp config/.env.sample config/.env
 # 6. Run!
 python minipupper_operator.py
 ```
+
 ### Google Cloud Setup
 
 See [docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md) for:
@@ -413,7 +462,7 @@ See [docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md) for:
 ### Test Pipeline
 
 ```bash
-# Test ASR → LLM ✂ TTS end-to-end
+# Test ASR → LLM → TTS end-to-end
 PYTHONPATH=. python3 scripts/test_pipeline.py --duration 5
 
 # Test barge-in detection
@@ -442,23 +491,7 @@ python3 scripts/calibrate_aec.py
 
 ---
 
-### Barge-in Tuning
-
-- Use `scripts/calibrate_aec.py` to measure echo delay/gain for your hardware
-- Adjust `nearend_min_cleaned_rms` (lower = more sensitive, default 500)
-- Adjust `vad_aggressiveness` (0-3, default 2)
-- Test with `scripts/test_bargein.py`
-
----
-
-
 ## Deployment
-
-### Local Testing
-
-```bash
-python minipupper_operator.py
-```
 
 ### Run Flags
 
@@ -466,181 +499,26 @@ python minipupper_operator.py
 python minipupper_operator.py --help
   --config PATH     Config file path (default: config/config.yaml)
   --k               Keyboard input mode (no ASR/TTS)
-  --m               Mute output (no TTS)
+  --m               Mute output (no TTS, text only)
+  --v               Verbose logging
 ```
 
 ---
 
-## Network
+## Further Reading
 
-### Tailscale Setup
-```bash
-# Install and authenticate
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up
-
-# Get IP on Tailscale network
-tailscale ip -4
-```
-
-App operates locally even if cloud connection is down.
-
----
-
-## Testing
-
-### Run Tests
-```bash
-# Unit tests (Phase 1 - TODO)
-pytest tests/unit/ -v
-
-# Integration tests (Phase 2 - TODO)
-pytest tests/integration/ -v
-
-# Barge-in detector test
-python -m src.audio.barge_in_detector
-```
-
-See [TESTING_PLAN.md](docs/TESTING_PLAN.md) for complete test strategy.
-
----
-
-## Troubleshooting
-
-### No Audio Input
-```bash
-# List devices
-arecord -l
-
-# Test recording
-arecord -d 3 -f cd /tmp/test.wav
-
-# Set correct device in config/.env
-AUDIO_DEVICE_INDEX=0
-```
-
-### Google Cloud Credentials
-
-```bash
-# Verify path
-echo $GOOGLE_APPLICATION_CREDENTIALs
-# Test credentials
-gcloud auth application-default print-access-token
-```
-
-### Barge-in Not Working
-
-```bash
-# Calibrate AEC settings for your hardware
-python3 scripts/calibrate_aec.py
-
-# Test detector separately
-python -m src.audio.barge_in_detector
-```
-
-### Service Won't Start
-
-```bash
-# Test manually with verbose logging
-source venv/bin/activate
-python minipupper_operator.py --debug
-```
-See [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md#8-troubleshooting) for more solutions.
-
-### Gateway Connection Issues
-
-- Verify Tailscale is running: `tailscale status`
-- Check node connection: `openclaw nodes status` (on gateway)
-- Check `.env` for correct `OPENCLAW_GATEWAY_URL`
-
----
-
-## Performance Targets
-
-| Metric | Target | Current |
-|---------|-------|---------|
-| Speech → Text (ASR) | < 2s | ✅ Met |
-| Text → Response (LLM) | 2-5s | ✅ Met (Gemini 2.5 Flash) |
-| Response → Speech (TTS) | < 1s | ✅ Met |
-| Barge-in Latency | < 500ms | ✅ Met |
-| Task Offload (cold start) | — | ~8-12s |
-| Simple Task Processing | — | ~2-5s |
-| **Total Conversation Latency** | <s8s | ✅ Met |
-
----
-
-## Roadmap
-
-| Phase | Timeline | Status | Description |
-|--------|---------|---------|-------------|
-| **Phase 1** | May 2026 | ✅ Complete | Audio pipeline (ASR, TTS, barge-in) |
-| **Phase 2** | May-Jun 2026 | ✅ Active | OpenClaw Gateway integration (file-based task protocol, task watcher, cron) |
-| **Phase 3** | May-Jun 2026 | ✅ Active | Complex tasks (vision analysis, person follow, look_here, knowledge base) |
-| **Phase 4** | TBD | ⓯ Planned | Performance tuning, stress testing, production hardening |
-
----
-
-## Documentation Index
-
-| Document | Purpose | Updated |
-|------------|---------|-----------|
-| `docs/ARCHITECTURE.md` | System design & data flow | 2026-05-09 |
-| `docs/OPENCLAW_INTEGRATION.md` | Gateway integration deep dive | 2026-05-11 |
-| `docs/CURRENT_STATE.md` | Development status snapshot | 2026-05-11 |
-| `docs/PROGRESS.md` | Development log with milestones | 2026-05-09 |
-| `docs/SETUP_GUIDE.md` | Complete setup instructions | 2026-05-28 |
-| `docs/DEPLOYMENT_GUIDE.md` | Installation & operations | 2026-05-09 |
-| `docs/TASK_ARCHIVING.md` | Task archive system | 2026-05-11 |
-| `docs/BARGE_IN_GUIDE.md` | Barge-in implementation details | 2026-05-09 |
-| `docs/TESTING_PLAN.md` | Test strategy & checklist | 2026-05-09 |
-| `docs/GOOGLE_CLOUD_SETUP.md` | Google Cloud credential setup | 2026-05-09 |
-| `docs/audio-architecture.md` | Audio subsystem deep dive | 2026-05-28 |
-| `docs/phase3-complex-tasks.md` | Complex task architecture | 2026-05-28 |
-| `docs/phase3-overhaul.md` | Phase 3 overhaul notes | 2026-05-28 |
-| `PHASE2.md` | Phase 2 protocol documentation | 2026-05-11 |
-| `QUICKSTART.md` | Abbreviated quick start | 2026-05-10 |
-| `ROADMAP.md` | Detailed development roadmap | 2026-05-09 |
-
----
-
-## Requirements
-
-### Hardware
-- Mini Pupper v2 robot (Raspberry Pi CM4)
-- USB microphone + speaker (or built-in audio)
-- 64GB microSFD (UHS-I recommended)
-
-### Software
-- Python 3.9+ (tested on 3.10)
-- WebRTC VAD for barge-in
-- Ubuntu (tested on Ubuntu 22.04)
-- All dependencies in `requirements.txt`
-
-### Google Cloud
-- Active Google Cloud account
-- Service account with: Cloud Speech-to-Text API, Cloud Text-to-Speech API, Vertex AI API
-- See `docs/GOOGLE_CLOUD_SETUP.md` 
-
-### OpenClaw (optional, for task offloading)
-- Gateway server (cloud or local)
-- Tailscale mesh network
-- Node service running on Pi
+- [Architecture](docs/ARCHITECTURE.md) — Complete system design
+- [Setup Guide](docs/SETUP_GUIDE.md) — Step-by-step manual setup
+- [Gateway Integration](docs/OPENCLAW_INTEGRATION.md) — OpenClaw protocol details
+- [Deployment Guide](docs/DEPLOYMENT_GUIDE.md) — Production operations
+- [Barge-in Guide](docs/BARGE_IN_GUIDE.md) — AEC/VAD tuning
+- [Google Cloud Setup](docs/GOOGLE_CLOUD_SETUP.md) — Credential configuration
+- [Progress Log](docs/PROGRESS.md) — Development history
+- [Current State](docs/CURRENT_STATE.md) — Latest status
+- [ROADMAP.md](ROADMAP.md) — Future plans
 
 ---
 
 ## License
 
-See [LICENSE](../LICENSE) file.
-
----
-
-## Support
-
-- **Documentation:** See [docs/](docs/) folder
-- **Google Cloud Setup:** [docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md)
-- **Troubleshooting:** [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md#8-troubleshooting)
-- **Issues:** Check [PROGRESS.md](docs/PROGRESS.md) for known issues
-
----
-***Status:** Phase 2 Active — Audio Pipeline ✅, ✅ OpenClaw Integration ✅, ✅ Complex Tasks ✅
-***Last Updated:** 2026-05-29
+MIT
