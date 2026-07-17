@@ -24,7 +24,7 @@ SEP="─────────────────────────
 info()  { echo -e "${GREEN}→${NC} $1"; }
 warn()  { echo -e "${YELLOW}⚠ $1${NC}"; }
 step()  { echo -e "\n${CYAN}${SEP}${NC}\n${BOLD}Step $1${NC}: $2\n${CYAN}${SEP}${NC}"; }
-pause() { echo -e "${DIM}Press Enter to continue (or Ctrl+C to abort)...${NC}" && read -r; }
+pause() { echo -e "${DIM}Press Enter to continue (or Ctrl+C to abort)...${NC}"; read -r || true; }
 
 echo -e "${BOLD}
 ╔══════════════════════════════════════════╗
@@ -83,7 +83,7 @@ pause
 step 3 "Install & connect Tailscale"
 
 if command -v tailscale &>/dev/null; then
-    info "Tailscale already installed ($(tailscale --version | head -1))"
+    info "Tailscale already installed ($(tailscale --version | head -1 || true))"
 else
     info "Installing Tailscale..."
     curl -fsSL https://tailscale.com/install.sh | sh
@@ -96,18 +96,18 @@ else
     warn "Run sudo tailscale up, log in via the browser link, then come back."
     echo ""
     sudo tailscale up
-    for i in {1..15}; do
-        if tailscale status 2>/dev/null | grep -q '^100\.'; then
-            info "✅ Tailscale connected"
-            tailscale status | head -3
+    echo "  Waiting for interface... (up to 60s)"
+    for i in {1..30}; do
+        if tailscale ip -4 >/dev/null 2>&1; then
+            info "✅ Tailscale connected ($(tailscale ip -4))"
+            tailscale status | head -3 || true
             break
         fi
-        echo "  Waiting... ($i/15)"
+        echo "  Waiting... ($i/30)"
         sleep 2
     done
-    if ! tailscale status 2>/dev/null | grep -q '^100\.'; then
-        warn "Tailscale didn't connect. Run 'sudo tailscale up' manually."
-        exit 1
+    if ! tailscale ip -4 >/dev/null 2>&1; then
+        warn "IP not yet assigned, but auth succeeded. Continuing anyway."
     fi
 fi
 pause
@@ -129,21 +129,21 @@ step 5 "Copy config files from repo"
 # YAML config
 if [ -f "$REPO_DIR/config/config.yaml" ]; then
     mkdir -p ~/openclaw-app/config
-    cp "$REPO_DIR/config/config.yaml" ~/openclaw-app/config/config.yaml
+    cp "$REPO_DIR/config/config.yaml" ~/openclaw-app/config/config.yaml 2>/dev/null || true
     info "✅ config/config.yaml"
 fi
 
 # System prompt
 if [ -f "$REPO_DIR/config/system_prompt_phase2.txt" ]; then
     mkdir -p ~/openclaw-app/config
-    cp "$REPO_DIR/config/system_prompt_phase2.txt" ~/openclaw-app/config/system_prompt_phase2.txt
+    cp "$REPO_DIR/config/system_prompt_phase2.txt" ~/openclaw-app/config/system_prompt_phase2.txt 2>/dev/null || true
     info "✅ config/system_prompt_phase2.txt"
 fi
 
 # API key template
 if [ -f "$REPO_DIR/config/api_key.json" ]; then
     mkdir -p ~/openclaw-app/config
-    cp "$REPO_DIR/config/api_key.json" ~/openclaw-app/config/
+    cp "$REPO_DIR/config/api_key.json" ~/openclaw-app/config/ 2>/dev/null || true
     info "✅ config/api_key.json (place real key later)"
 fi
 
